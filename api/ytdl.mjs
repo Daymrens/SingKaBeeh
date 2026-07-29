@@ -1,39 +1,37 @@
-import ytdl from '@distube/ytdl-core';
-
-const AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
+const SERVICES = [
+  id => `https://api.vevioz.com/api/button/mp3/${id}`,
+  id => `https://www.yt-download.org/api/button/mp3/${id}`,
+];
 
 export default async function handler(req, res) {
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Missing url param' });
 
-  try {
-    const info = await ytdl.getInfo(url, {
-      requestOptions: {
-        headers: {
-          'User-Agent': AGENT,
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        },
-      },
-    });
-    const format = ytdl.chooseFormat(info.formats, { filter: 'audioonly', quality: 'lowestaudio' });
-    if (!format) return res.status(500).json({ error: 'No audio format found' });
+  const id = extractId(url);
+  if (!id) return res.status(400).json({ error: 'Invalid YouTube URL' });
 
-    const title = info.videoDetails.title.replace(/[^\w\s-]/g, '');
-    res.setHeader('Content-Type', format.mimeType || 'audio/webm');
-    res.setHeader('Content-Disposition', `attachment; filename="${title}.webm"`);
+  for (const buildUrl of SERVICES) {
+    try {
+      const apiUrl = buildUrl(id);
+      const apiRes = await fetch(apiUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+        redirect: 'follow',
+      });
+      if (!apiRes.ok) continue;
+      const ct = apiRes.headers.get('content-type') || '';
+      if (!ct.startsWith('audio/') && !ct.includes('octet-stream') && !ct.includes('video/')) continue;
 
-    const stream = ytdl(url, {
-      format,
-      requestOptions: {
-        headers: {
-          'User-Agent': AGENT,
-          'Accept-Language': 'en-US,en;q=0.9',
-        },
-      },
-    });
-    stream.pipe(res);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+      const buffer = await apiRes.arrayBuffer();
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Disposition', `attachment; filename="${id}.mp3"`);
+      return res.end(Buffer.from(buffer));
+    } catch {}
   }
+
+  res.status(500).json({ error: 'All download services failed. Try a different video.' });
+}
+
+function extractId(str) {
+  const m = str.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|v\/)([\w-]{11})/);
+  return m ? m[1] : null;
 }
