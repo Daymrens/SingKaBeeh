@@ -1,6 +1,7 @@
-export default function TitleScreen({ onStart }) {
+export default function TitleScreen({ onStart, onAdmin }) {
   return (
     <div className="screen active fade-in">
+      <button className="admin-gear" onClick={onAdmin} title="Admin Panel">⚙️</button>
       <div className="title-content">
         <div className="emoji-header">🎤</div>
         <h1>Sing ka Beeh?</h1>

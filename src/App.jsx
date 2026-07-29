@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import SONGS, { shuffleArray } from './data/songs';
+import DEFAULT_SONGS, { shuffleArray } from './data/songs';
+import { loadSongs, saveSongs } from './utils/adminStorage';
 import { playTick, playRing, playSound } from './utils/sounds';
 import TitleScreen from './components/TitleScreen';
 import GameScreen from './components/GameScreen';
+import AdminScreen from './components/AdminScreen';
 import Confetti from './components/Confetti';
 import TimesUpPanel from './components/TimesUpPanel';
 import OverlayIcon from './components/OverlayIcon';
@@ -13,7 +15,8 @@ const PHASES = { IDLE: 'idle', PLAYING: 'playing', GUESSING: 'guessing', REVEALE
 
 export default function App() {
   const [screen, setScreen] = useState('title');
-  const [songs, setSongs] = useState([]);
+  const [songs, setSongs] = useState(() => loadSongs(DEFAULT_SONGS));
+  const [gameSongs, setGameSongs] = useState(null);
   const [round, setRound] = useState(0);
   const [phase, setPhase] = useState(PHASES.IDLE);
   const [timeLeft, setTimeLeft] = useState(GUESS_TIME);
@@ -29,7 +32,8 @@ export default function App() {
   const audioTimerRef = useRef(null);
   const audioRef = useRef(null);
 
-  const song = songs[round];
+  const activeSongs = gameSongs || songs;
+  const song = activeSongs[round];
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -65,9 +69,9 @@ export default function App() {
   }, [stopTimer, stopAudio]);
 
   const startGame = useCallback(() => {
-    const shuffled = [...SONGS];
+    const shuffled = [...songs];
     shuffleArray(shuffled);
-    setSongs(shuffled);
+    setGameSongs(shuffled);
     setScreen('game');
     setRound(0);
     setPhase(PHASES.IDLE);
@@ -84,7 +88,12 @@ export default function App() {
       audioRef.current = null;
     }
     stopAudio();
-  }, [stopTimer, stopAudio]);
+  }, [songs, stopTimer, stopAudio]);
+
+  const handleSaveSongs = useCallback((updated) => {
+    setSongs(updated);
+    saveSongs(updated);
+  }, []);
 
   const playCurrentRound = useCallback(() => {
     if (!song) return;
@@ -147,12 +156,13 @@ export default function App() {
 
   const nextRound = useCallback(() => {
     const next = round + 1;
-    if (next >= songs.length) {
+    if (next >= (gameSongs || songs).length) {
       setScreen('title');
+      setGameSongs(null);
       return;
     }
-    loadRound(songs, next);
-  }, [round, songs, loadRound]);
+    loadRound(gameSongs || songs, next);
+  }, [round, gameSongs, songs, loadRound]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && screen === 'title') {
@@ -199,6 +209,11 @@ export default function App() {
     if ((e.key === 'n' || e.key === 'N') && phase === PHASES.REVEALED) {
       nextRound();
     }
+    if (e.key === 'Escape' && screen === 'game') {
+      setScreen('title');
+      setGameSongs(null);
+      return;
+    }
   }, [screen, phase, startGame, startTimer, revealAnswer, playCurrentRound, stopAudio, stopTimer, nextRound]);
 
   useEffect(() => {
@@ -231,12 +246,12 @@ export default function App() {
     };
   }, [stopTimer, stopAudio]);
 
-  const roundLabel = song ? `Round ${round + 1} / ${songs.length}` : '';
+  const roundLabel = song ? `Round ${round + 1} / ${activeSongs.length}` : '';
   const songWithLabel = song ? { ...song, roundLabel } : null;
 
   return (
     <div id="app">
-      {screen === 'title' && <TitleScreen onStart={startGame} />}
+      {screen === 'title' && <TitleScreen onStart={startGame} onAdmin={() => setScreen('admin')} />}
 
       {screen === 'game' && songWithLabel && (
         <GameScreen
@@ -248,6 +263,10 @@ export default function App() {
           onRevealClick={revealAnswer}
           onNext={nextRound}
         />
+      )}
+
+      {screen === 'admin' && (
+        <AdminScreen songs={songs} onSave={handleSaveSongs} onBack={() => setScreen('title')} />
       )}
 
       {showConfetti && <Confetti />}
