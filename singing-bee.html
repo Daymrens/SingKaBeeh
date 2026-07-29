@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Singing Bee - Finish the Lyrics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&family=Inter:wght@400;600&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  max-width: 1000px;
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+.screen.active { display: flex; }
+
+.title-content { text-align: center; max-width: 650px; }
+.title-content h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 4.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffd700, #ff6b6b, #ffd700);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.title-content .subtitle {
+  font-size: 1.5rem;
+  color: #a0a0cc;
+  margin: 0.5rem 0 2rem;
+}
+.title-content .emoji-header { font-size: 3rem; margin-bottom: 0.5rem; }
+
+.team-banner {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,107,107,0.15));
+  border: 2px solid rgba(255,215,0,0.25);
+  border-radius: 16px;
+  padding: 1rem 2rem;
+  margin: 1.5rem 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  color: #ffd700;
+  letter-spacing: 1px;
+}
+
+.btn {
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn-primary {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #1a1a2e;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+}
+.btn-primary:hover { box-shadow: 0 6px 30px rgba(255, 215, 0, 0.5); }
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.18); }
+.btn-danger {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
+}
+.btn-success {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 184, 148, 0.3);
+}
+.btn-small {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.instructions {
+  text-align: left;
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.instructions h3 {
+  font-size: 0.9rem;
+  color: #a0a0cc;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.instructions ol {
+  list-style: none;
+  counter-reset: step;
+}
+.instructions ol li {
+  counter-increment: step;
+  padding: 0.3rem 0;
+  color: #c0c0e0;
+  font-size: 0.95rem;
+}
+.instructions ol li::before {
+  content: counter(step);
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.5rem;
+  font-size: 0.75rem;
+  color: #ffd700;
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.game-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.round-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+.round-badge {
+  background: rgba(255,215,0,0.15);
+  color: #ffd700;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.hint-badge {
+  background: rgba(0,212,255,0.12);
+  color: #00d4ff;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.timer-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.timer-display.warning { color: #ff6b6b; }
+.timer-icon { font-size: 1.3rem; }
+
+.lyrics-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem 0;
+  min-height: 300px;
+}
+
+.listening-state {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.listening-state .pulse-icon {
+  font-size: 4rem;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.7; }
+}
+.listening-state p {
+  font-size: 1.3rem;
+  color: #a0a0cc;
+  margin-top: 1rem;
+}
+.listening-state .progress-bar {
+  width: 300px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  margin: 1.5rem auto 0;
+  overflow: hidden;
+}
+.listening-state .progress-bar .fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ffd700, #ff6b6b);
+  border-radius: 4px;
+  transition: width 0.1s linear;
+}
+
+.lyrics-text {
+  text-align: center;
+  display: none;
+  width: 100%;
+  max-width: 880px;
+}
+.lyrics-text.visible { display: block; }
+.lyric-line {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0.3rem 0;
+  opacity: 0.5;
+  transition: opacity 0.4s;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  padding: 0 1rem;
+}
+.lyric-line.active { opacity: 1; }
+.lyric-line.blank-line {
+  opacity: 1;
+  color: #ff6b6b;
+  font-weight: 900;
+  letter-spacing: 4px;
+  border-bottom: 3px dashed #ff6b6b;
+  display: inline-block;
+  padding-bottom: 0.1rem;
+  margin-top: 0.3rem;
+}
+.lyric-line.revealed {
+  opacity: 1;
+  color: #00d4ff;
+  border-bottom: none;
+  animation: revealSlide 0.5s ease-out;
+}
+@keyframes revealSlide {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.audio-bar {
+  width: 100%; height: 4px; background: rgba(255,255,255,0.1);
+  border-radius: 4px; overflow: hidden; margin-top: 0.5rem;
+  grid-column: 1 / -1;
+}
+.audio-bar .fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #ffd700, #ff6b6b);
+  border-radius: 4px; transition: none;
+}
+
+.song-info {
+  font-size: 1rem;
+  color: #a0a0cc;
+  margin-top: 0.5rem;
+  display: none;
+}
+.song-info.visible { display: block; }
+.song-info .title { color: #fff; font-weight: 700; }
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding: 1rem 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 700px) {
+  #app { padding: 1rem; }
+  .title-content h1 { font-size: 2.8rem; }
+  .title-content .subtitle { font-size: 1.1rem; }
+  .lyric-line { font-size: 1.4rem; }
+  .game-header { flex-wrap: wrap; gap: 0.5rem; }
+  .round-info { flex-wrap: wrap; gap: 0.5rem; }
+  .controls .btn { padding: 0.8rem 1.5rem; font-size: 1rem; }
+}
+
+.fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.confetti-wrap {
+  position: fixed; inset: 0; overflow: hidden; z-index: 1000; pointer-events: none;
+}
+.confetti-piece {
+  position: absolute; width: 10px; height: 10px; top: -10px;
+  animation: confettiFall 1.5s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+.overlay-icon {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0);
+  z-index: 999; font-size: 8rem; pointer-events: none;
+  animation: overlayPop 0.8s ease-out forwards;
+}
+@keyframes overlayPop {
+  0% { transform: translate(-50%,-50%) scale(0); opacity: 0; }
+  40% { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+}
+
+.timesup-panel {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.65);
+  animation: fadeIn 0.3s ease-out;
+}
+.timesup-panel .box {
+  background: linear-gradient(135deg, #1a1a2e, #302b63);
+  border: 2px solid rgba(255,107,107,0.3);
+  border-radius: 20px; padding: 2.5rem 3rem; text-align: center;
+  box-shadow: 0 10px 50px rgba(0,0,0,0.6);
+  animation: popIn 0.3s ease-out;
+}
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.timesup-panel h2 { font-family: 'Poppins', sans-serif; font-size: 2.5rem; margin-bottom: 0.3rem; }
+.timesup-panel .btn {
+  background: rgba(255,255,255,0.1); color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.7rem 2rem; border-radius: 10px;
+  font-family: 'Poppins', sans-serif; font-size: 1rem; cursor: pointer;
+  transition: background 0.2s;
+}
+.timesup-panel .btn:hover { background: rgba(255,255,255,0.2); }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <audio id="bg-audio" preload="auto"></audio>
+
+  <div id="screen-title" class="screen active">
+    <div class="title-content fade-in">
+      <div class="emoji-header">🎤</div>
+      <h1>Sing ka Beeh?</h1>
+      <p class="subtitle">"Finish the Lyrics"</p>
+      <div class="team-banner">🎤 Billing Team | Game Night 🎤</div>
+      <button id="btn-start" class="btn btn-primary" onclick="startGame()">🎵 START GAME</button>
+      <div class="instructions">
+        <h3>How to Play</h3>
+        <ol>
+          <li>A song clip plays — listen carefully!</li>
+          <li>Lyrics appear with a blanked-out line</li>
+          <li>Shout out or chat the missing lyrics</li>
+          <li>Host clicks Reveal to show the answer</li>
+          <li>Press Next Round to continue!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <div class="round-info">
+        <span class="round-badge" id="round-badge">Round 1 / 10</span>
+        <span class="hint-badge" id="hint-badge">🎵 Hint</span>
+      </div>
+      <div class="timer-display">
+        <span class="timer-icon">⏱</span>
+        <span id="timer-text">20</span>
+      </div>
+      <div class="audio-bar"><div class="fill" id="audio-progress"></div></div>
+    </div>
+
+    <div class="lyrics-area">
+      <div class="lyrics-text" id="lyrics-text"></div>
+      <div class="song-info" id="song-info"></div>
+    </div>
+
+    <div class="controls" id="controls">
+      <button id="btn-play" class="btn btn-primary" onclick="playCurrentRound()">▶ Play Song</button>
+      <button id="btn-reveal" class="btn btn-danger btn-small" onclick="revealAnswer()" disabled>👁 Reveal</button>
+      <button id="btn-next" class="btn btn-success btn-small" onclick="nextRound()" disabled>▶ Next Round</button>
+      <button id="btn-play-again" class="btn btn-secondary btn-small" onclick="playCurrentRound()" disabled>🔁 Play Again</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SONGS = [
+  {
+    id: 1, title: "Pantropiko'", artist: "BINI",
+    file: "Songs/song-01.mp3",
+    lyrics: "From following your footprints in the sand\nTo walking with you on this island\nGuided by the grip of your hand\nI can feel you're holding my world",
+    answer: "Ano ba itong nadarama oh shux Ito ba'y pag-ibig na ha Totoo ba ang pinadama Cause boy it feels so good", hint: "PPop Girl Group"
+  },
+  {
+    id: 2, title: "Bohemian Rhapsody", artist: "Queen",
+    file: "Songs/song-02.mp3",
+    lyrics: "Is this the real life?\nIs this just fantasy?\n____",
+    answer: "Caught in a landslide, no escape from reality", hint: "70s Rock Opera"
+  },
+  {
+    id: 3, title: "Dancing Queen", artist: "ABBA",
+    file: "Songs/song-03.mp3",
+    lyrics: "You can dance, you can jive\nHaving the time of your life\n____",
+    answer: "Ooh, see that girl, watch that scene, diggin' the dancing queen", hint: "70s Disco Pop"
+  },
+  {
+    id: 4, title: "...Baby One More Time", artist: "Britney Spears",
+    file: "Songs/song-04.mp3",
+    lyrics: "____",
+    answer: "Show me how you want it to be", hint: "90s Pop"
+  },
+  {
+    id: 5, title: "Rolling in the Deep", artist: "Adele",
+    file: "Songs/song-05.mp3",
+    lyrics: "The scars of your love remind me of us\n____",
+    answer: "They keep me thinkin' that we almost had it all", hint: "2010s Soul"
+  },
+  {
+    id: 6, title: "Shape of You", artist: "Ed Sheeran",
+    file: "Songs/song-06.mp3",
+    lyrics: "The club isn't the best place to find a lover\nSo the bar is where I go\n____",
+    answer: "Me and my friends at the table doing shots, drinking fast and then we talk slow", hint: "2010s Pop"
+  },
+  {
+    id: 7, title: "Uptown Funk", artist: "Bruno Mars",
+    file: "Songs/song-07.mp3",
+    lyrics: "This hit, that ice cold, Michelle Pfeiffer, that white gold\n____",
+    answer: "This one for them hood good girls, them good girls straight masterpieces", hint: "2010s Funk"
+  },
+  {
+    id: 8, title: "bad guy", artist: "Billie Eilish",
+    file: "Songs/song-08.mp3",
+    lyrics: "White shirt now red, my bloody nose\nSleeping, you're on your tippy toes\n____",
+    answer: "Creeping around like no one knows, think you're so criminal", hint: "2010s Alt Pop"
+  },
+  {
+    id: 9, title: "Shake It Off", artist: "Taylor Swift",
+    file: "Songs/song-09.mp3",
+    lyrics: "My ex-man brought his new girlfriend\n____",
+    answer: "She's like, Oh my God, but I'm just gonna shake", hint: "2010s Pop"
+  },
+  {
+    id: 10, title: "Eye of the Tiger", artist: "Survivor",
+    file: "Songs/song-10.mp3",
+    lyrics: "Risin' up, back on the street\nDid my time, took my chances\n____",
+    answer: "Went the distance, now I'm back on my feet, just a man and his will to survive", hint: "80s Rock"
+  }
+];
+
+const GUESS_TIME = 5;
+const timerDisplay = document.getElementById('timer-text');
+
+let state = {
+  currentRound: 0,
+  phase: 'idle',
+  timer: null,
+  timeLeft: GUESS_TIME,
+  audioTimer: null,
+  audio: null
+};
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  state.currentRound = 0;
+  shuffleArray(SONGS);
+  showScreen('screen-game');
+  loadRound();
+}
+
+function getCurrentSong() {
+  return SONGS[state.currentRound];
+}
+
+function loadRound() {
+  const song = getCurrentSong();
+  state.phase = 'idle';
+  document.getElementById('round-badge').textContent = `Round ${state.currentRound + 1} / ${SONGS.length}`;
+  document.getElementById('hint-badge').textContent = `🎵 ${song.hint}`;
+  document.getElementById('song-info').textContent = `${song.title} — ${song.artist}`;
+  document.getElementById('song-info').classList.remove('visible');
+
+  document.getElementById('lyrics-text').classList.remove('visible');
+  document.getElementById('song-info').classList.remove('visible');
+
+  document.getElementById('btn-play').disabled = false;
+  document.getElementById('btn-reveal').disabled = true;
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('btn-play-again').disabled = true;
+
+  stopTimer();
+  document.getElementById('timer-text').textContent = GUESS_TIME;
+  timerDisplay.parentElement.classList.remove('warning');
+  document.getElementById('audio-progress').style.width = '0%';
+}
+
+function playCurrentRound() {
+  dismissTimesUp();
+  stopTimer();
+  state.timeLeft = GUESS_TIME;
+  document.getElementById('timer-text').textContent = GUESS_TIME;
+  timerDisplay.parentElement.classList.remove('warning');
+  if (state.phase === 'idle' || state.phase === 'guessing' || state.phase === 'playing') {
+    document.getElementById('btn-next').disabled = true;
+  }
+  const song = getCurrentSong();
+
+  document.getElementById('btn-play').disabled = true;
+  document.getElementById('btn-play-again').disabled = true;
+  document.getElementById('audio-progress').style.width = '0%';
+
+  state.phase = 'playing';
+
+  if (state.audio) {
+    state.audio.pause();
+    state.audio.onended = null;
+  }
+
+  const audio = document.getElementById('bg-audio');
+  audio.src = song.file;
+  state.audio = audio;
+  audio.play().catch(() => {});
+
+  if (state.audioTimer) clearInterval(state.audioTimer);
+  state.audioTimer = setInterval(() => {
+    if (audio.duration) {
+      document.getElementById('audio-progress').style.width = (audio.currentTime / audio.duration * 100) + '%';
+    }
+  }, 100);
+
+  renderLyrics();
+  document.getElementById('lyrics-text').classList.add('visible');
+  document.getElementById('song-info').classList.remove('visible');
+
+  audio.onended = () => {};
+  setTimeout(() => {
+    if (state.phase === 'playing') document.getElementById('btn-reveal').disabled = false;
+  }, 60000);
+}
+
+function renderLyrics() {
+  const song = getCurrentSong();
+  const container = document.getElementById('lyrics-text');
+  const lines = song.lyrics.split('\n');
+  container.innerHTML = lines.map(line => {
+    if (line.trim() === '____') {
+      return `<div class="lyric-line blank-line">________________</div>`;
+    }
+    return `<div class="lyric-line active">${sanitize(line)}</div>`;
+  }).join('');
+}
+
+function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function revealAnswer() {
+  if (state.phase !== 'guessing' && state.phase !== 'playing') return;
+  if (state.audio) {
+    state.audio.pause();
+    state.audio = null;
+  }
+  if (state.audioTimer) {
+    clearInterval(state.audioTimer);
+    state.audioTimer = null;
+  }
+  state.phase = 'revealed';
+  stopTimer();
+  document.getElementById('btn-reveal').disabled = true;
+  document.getElementById('btn-play-again').disabled = true;
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('song-info').classList.add('visible');
+
+  const song = getCurrentSong();
+  const container = document.getElementById('lyrics-text');
+  const lines = song.lyrics.split('\n');
+  const hasBlank = lines.some(l => l.trim() === '____');
+  container.innerHTML = lines.map(line => {
+    if (line.trim() === '____') {
+      return `<div class="lyric-line revealed">${sanitize(song.answer)}</div>`;
+    }
+    return `<div class="lyric-line active">${sanitize(line)}</div>`;
+  }).join('') + (hasBlank ? '' : `<div class="lyric-line revealed" style="margin-top:0.8rem">${sanitize(song.answer)}</div>`);
+}
+
+function nextRound() {
+  state.currentRound++;
+  if (state.currentRound >= SONGS.length) {
+    showScreen('screen-title');
+    return;
+  }
+  loadRound();
+}
+
+function startTimer() {
+  state.timeLeft = GUESS_TIME;
+  document.getElementById('timer-text').textContent = state.timeLeft;
+  timerDisplay.parentElement.classList.remove('warning');
+  stopTimer();
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    document.getElementById('timer-text').textContent = state.timeLeft;
+    if (state.timeLeft <= 5) {
+      timerDisplay.parentElement.classList.add('warning');
+    }
+    if (state.timeLeft > 0 && state.timeLeft <= 4) playTick();
+    if (state.timeLeft <= 0) {
+      stopTimer();
+      playRing();
+      showTimesUp();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timer) {
+    clearInterval(state.timer);
+    state.timer = null;
+  }
+}
+
+function playTick() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.value = 1200;
+    g.gain.value = 0.15;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(ctx.currentTime + 0.05);
+  } catch (_) {}
+}
+function playRing() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [800, 1000, 1200].forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.08);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.4);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(ctx.currentTime + i * 0.08);
+      o.stop(ctx.currentTime + i * 0.08 + 0.4);
+    });
+  } catch (_) {}
+}
+
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const g = ctx.createGain();
+    g.connect(ctx.destination);
+    g.gain.value = 0.3;
+    if (type === 'correct') {
+      [523, 659, 784].forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        o.connect(g);
+        o.start(ctx.currentTime + i * 0.12);
+        o.stop(ctx.currentTime + i * 0.12 + 0.3);
+      });
+    } else {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.value = 200;
+      o.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+      o.connect(g);
+      o.start();
+      o.stop(ctx.currentTime + 0.4);
+    }
+  } catch (_) {}
+}
+
+function showConfetti() {
+  playSound('correct');
+  const colors = ['#ffd700','#ff6b6b','#00d4ff','#00b894','#a29bfe','#fd79a8','#fdcb6e'];
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti-wrap';
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (6 + Math.random() * 8) + 'px';
+    el.style.height = (6 + Math.random() * 8) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    el.style.animationDuration = (1 + Math.random() * 1.2) + 's';
+    el.style.animationDelay = Math.random() * 0.4 + 's';
+    wrap.appendChild(el);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 3000);
+}
+
+function showTimesUp() {
+  const el = document.createElement('div');
+  el.className = 'timesup-panel';
+  el.id = 'timesup-panel';
+  el.innerHTML = `
+    <div class="box">
+      <h2>⏰ Time's Up!</h2>
+      <button class="btn" onclick="dismissTimesUp()">OK</button>
+    </div>
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => dismissTimesUp(), 2000);
+}
+function dismissTimesUp() {
+  const el = document.getElementById('timesup-panel');
+  if (el) el.remove();
+}
+
+function showOverlayIcon(emoji) {
+  const size = emoji === '❌' ? '12rem' : '8rem';
+  if (emoji === '❌') playSound('wrong');
+  const el = document.createElement('div');
+  el.className = 'overlay-icon';
+  el.style.fontSize = size;
+  el.textContent = emoji;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('screen-title').classList.contains('active')) { startGame(); return; }
+  }
+  if (e.key === ' ' || e.key === 'Space') {
+    e.preventDefault();
+    if (state.phase === 'playing') {
+      stopTimer();
+      state.phase = 'guessing';
+      document.getElementById('btn-reveal').disabled = false;
+      document.getElementById('btn-play-again').disabled = false;
+      startTimer();
+      return;
+    }
+    if (state.phase === 'guessing') {
+      revealAnswer();
+      return;
+    }
+    if (state.phase === 'idle') playCurrentRound();
+  }
+  if (e.which === 49 || e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') {
+    if (state.phase === 'guessing' || state.phase === 'revealed') {
+      e.preventDefault();
+      if (state.audio) { state.audio.pause(); state.audio = null; }
+      if (state.audioTimer) { clearInterval(state.audioTimer); state.audioTimer = null; }
+      showConfetti();
+      state.phase = 'revealed';
+      stopTimer();
+      document.getElementById('btn-reveal').disabled = true;
+      document.getElementById('btn-next').disabled = false;
+      return;
+    }
+  }
+  if (e.which === 50 || e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') {
+    if (state.phase === 'guessing' || state.phase === 'revealed') {
+      e.preventDefault();
+      showOverlayIcon('❌');
+      return;
+    }
+  }
+  if (state.phase === 'revealed') {
+    if (e.key === 'n' || e.key === 'N') {
+      nextRound();
+    }
+  }
+});
+</script>
+</body>
+</html>
