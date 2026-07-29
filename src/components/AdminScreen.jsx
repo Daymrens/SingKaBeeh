@@ -85,6 +85,7 @@ function SongEditor({ song, onChange, songs, onSave }) {
   const [cropEnd, setCropEnd] = useState(0);
   const [cropBlob, setCropBlob] = useState(null);
   const [waveformLoaded, setWaveformLoaded] = useState(false);
+const [playing, setPlaying] = useState(false);
   const waveRef = useRef(null);
   const waveSurferRef = useRef(null);
 
@@ -118,6 +119,7 @@ function SongEditor({ song, onChange, songs, onSave }) {
       setCropEnd(ws.getDuration());
     });
     ws.on('timeupdate', () => {});
+    ws.on('finish', () => setPlaying(false));
     waveSurferRef.current = ws;
   }, []);
 
@@ -196,8 +198,9 @@ function SongEditor({ song, onChange, songs, onSave }) {
               </label>
             </div>
             <div className="crop-buttons">
-              <button className="btn btn-secondary btn-small" onClick={() => waveSurferRef.current?.play()}>
-                ▶ Preview Waveform
+              <button className="btn btn-secondary btn-small"
+                onClick={() => { const ws = waveSurferRef.current; if (!ws) return; if (ws.isPlaying()) { ws.pause(); setPlaying(false); } else { ws.play(); setPlaying(true); } }}>
+                {playing ? '⏹ Stop' : '▶ Play'}
               </button>
               {audioFile && (
                 <button className="btn btn-primary btn-small" onClick={handleCrop}
