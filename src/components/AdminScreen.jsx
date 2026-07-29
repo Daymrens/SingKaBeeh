@@ -69,7 +69,7 @@ export default function AdminScreen({ songs, onSave, onBack }) {
 
         <div className="admin-content">
           {editing ? (
-            <SongEditor song={editing} onChange={handleFieldChange} songs={songs} onSave={onSave} />
+            <SongEditor key={editing.id} song={editing} onChange={handleFieldChange} songs={songs} onSave={onSave} />
           ) : (
             <div className="admin-empty">Select a song to edit</div>
           )}

@@ -26,6 +26,9 @@ export default function App() {
   const [overlay, setOverlay] = useState(null);
   const overlayTimerRef = useRef(null);
   const [showTimesUp, setShowTimesUp] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminPass, setAdminPass] = useState('');
+  const [adminError, setAdminError] = useState(false);
 
   const timerRef = useRef(null);
   const timeLeftRef = useRef(GUESS_TIME);
@@ -251,7 +254,7 @@ export default function App() {
 
   return (
     <div id="app">
-      {screen === 'title' && <TitleScreen onStart={startGame} onAdmin={() => setScreen('admin')} />}
+      {screen === 'title' && <TitleScreen onStart={startGame} onAdmin={() => setShowAdminLogin(true)} />}
 
       {screen === 'game' && songWithLabel && (
         <GameScreen
@@ -272,6 +275,25 @@ export default function App() {
       {showConfetti && <Confetti />}
       {showTimesUp && <TimesUpPanel onDismiss={() => setShowTimesUp(false)} />}
       {overlay && <OverlayIcon emoji={overlay} />}
+
+      {showAdminLogin && (
+        <div className="admin-login-overlay" onClick={() => { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); }}>
+          <div className="admin-login-box" onClick={e => e.stopPropagation()}
+            onKeyDown={e => { if (e.key === 'Enter') { const ok = adminPass === '@dmin' || adminPass === '@dm1n'; if (ok) { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); setScreen('admin'); } else { setAdminError(true); } } }}>
+            <h2>🔐 Admin Access</h2>
+            <input type="password" value={adminPass} autoFocus
+              onChange={e => { setAdminPass(e.target.value); setAdminError(false); }}
+              placeholder="Enter password" className={adminError ? 'shake' : ''} />
+            {adminError && <p className="login-error">Incorrect password</p>}
+            <div className="login-btns">
+              <button className="btn btn-primary btn-small"
+                onClick={() => { const ok = adminPass === '@dmin' || adminPass === '@dm1n'; if (ok) { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); setScreen('admin'); } else { setAdminError(true); } }}>Login</button>
+              <button className="btn btn-secondary btn-small"
+                onClick={() => { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
