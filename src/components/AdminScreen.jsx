@@ -84,6 +84,7 @@ function SongEditor({ song, onChange, songs, onSave }) {
   const [cropStart, setCropStart] = useState(0);
   const [cropEnd, setCropEnd] = useState(0);
   const [cropBlob, setCropBlob] = useState(null);
+  const [waveformLoaded, setWaveformLoaded] = useState(false);
   const waveRef = useRef(null);
   const waveSurferRef = useRef(null);
 
@@ -110,6 +111,7 @@ function SongEditor({ song, onChange, songs, onSave }) {
       barWidth: 2,
       barRadius: 2,
     });
+    setWaveformLoaded(true);
     ws.load(url);
     ws.on('ready', () => {
       setCropStart(0);
@@ -181,7 +183,7 @@ function SongEditor({ song, onChange, songs, onSave }) {
 
         <div ref={waveRef} className="waveform-container"></div>
 
-        {audioFile && (
+        {waveformLoaded && (
           <div className="cropper-controls">
             <div className="crop-sliders">
               <label>Start: {cropStart.toFixed(1)}s
@@ -195,22 +197,28 @@ function SongEditor({ song, onChange, songs, onSave }) {
             </div>
             <div className="crop-buttons">
               <button className="btn btn-secondary btn-small" onClick={() => waveSurferRef.current?.play()}>
-                ▶ Preview
+                ▶ Preview Waveform
               </button>
-              <button className="btn btn-primary btn-small" onClick={handleCrop}
-                disabled={cropStart >= cropEnd}>
-                ✂ Crop & Download
-              </button>
+              {audioFile && (
+                <button className="btn btn-primary btn-small" onClick={handleCrop}
+                  disabled={cropStart >= cropEnd}>
+                  ✂ Crop & Download
+                </button>
+              )}
             </div>
             {cropBlob && <p className="crop-success">✓ Cropped! Downloaded as <strong>song-{String(song.id).padStart(2, '0')}-cropped.wav</strong></p>}
           </div>
         )}
 
-        {!audioFile && existingAudio && (
+        {!audioFile && existingAudio && !waveformLoaded && (
           <div className="cropper-existing">
             <p>Existing audio: <strong>{song.file}</strong></p>
-            <button className="btn btn-secondary btn-small"
-              onClick={() => initWaveSurfer(song.file)}>Load Waveform</button>
+            <div className="crop-buttons">
+              <button className="btn btn-secondary btn-small"
+                onClick={() => { const a = new Audio(song.file); a.play(); }}>▶ Preview</button>
+              <button className="btn btn-secondary btn-small"
+                onClick={() => initWaveSurfer(song.file)}>Load Waveform</button>
+            </div>
           </div>
         )}
       </div>
