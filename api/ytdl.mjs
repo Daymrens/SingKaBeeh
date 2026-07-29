@@ -1,7 +1,4 @@
-const SERVICES = [
-  id => `https://api.vevioz.com/api/button/mp3/${id}`,
-  id => `https://www.yt-download.org/api/button/mp3/${id}`,
-];
+import { Innertube } from 'youtubei.js';
 
 export default async function handler(req, res) {
   const { url } = req.query;
@@ -10,25 +7,27 @@ export default async function handler(req, res) {
   const id = extractId(url);
   if (!id) return res.status(400).json({ error: 'Invalid YouTube URL' });
 
-  for (const buildUrl of SERVICES) {
-    try {
-      const apiUrl = buildUrl(id);
-      const apiRes = await fetch(apiUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
-        redirect: 'follow',
-      });
-      if (!apiRes.ok) continue;
-      const ct = apiRes.headers.get('content-type') || '';
-      if (!ct.startsWith('audio/') && !ct.includes('octet-stream') && !ct.includes('video/')) continue;
+  try {
+    const yt = await Innertube.create();
+    const info = await yt.getInfo(id);
 
-      const buffer = await apiRes.arrayBuffer();
-      res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Content-Disposition', `attachment; filename="${id}.mp3"`);
-      return res.end(Buffer.from(buffer));
-    } catch {}
+    const format = info.chooseFormat({ type: 'audio', quality: 'best' });
+    if (!format) return res.status(500).json({ error: 'No audio format available' });
+
+    const title = info.basic_info.title.replace(/[^\w\s-]/g, '') || id;
+    const ext = format.mime_type?.includes('mp4') ? 'm4a' : 'webm';
+    res.setHeader('Content-Type', format.mime_type || 'audio/webm');
+    res.setHeader('Content-Disposition', `attachment; filename="${title}.${ext}"`);
+
+    const stream = await format.download();
+    for await (const chunk of stream) {
+      res.write(chunk);
+    }
+    res.end();
+  } catch (e) {
+    const msg = e.message || String(e);
+    res.status(500).json({ error: msg.slice(0, 300) });
   }
-
-  res.status(500).json({ error: 'All download services failed. Try a different video.' });
 }
 
 function extractId(str) {
