@@ -34,6 +34,7 @@ export default function App() {
   const timeLeftRef = useRef(GUESS_TIME);
   const audioTimerRef = useRef(null);
   const audioRef = useRef(null);
+  const phaseRef = useRef(PHASES.IDLE);
 
   const activeSongs = gameSongs || songs;
   const song = activeSongs[round];
@@ -146,7 +147,8 @@ export default function App() {
   }, [stopTimer]);
 
   const revealAnswer = useCallback(() => {
-    if (phase !== PHASES.GUESSING && phase !== PHASES.PLAYING) return;
+    const p = phaseRef.current;
+    if (p !== PHASES.GUESSING && p !== PHASES.PLAYING) return;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -154,8 +156,10 @@ export default function App() {
     stopAudio();
     stopTimer();
     setPhase(PHASES.REVEALED);
+    setShowConfetti(true);
+    playSound('correct');
     setOverlay(null);
-  }, [phase, stopAudio, stopTimer]);
+  }, [stopAudio, stopTimer]);
 
   const nextRound = useCallback(() => {
     const next = round + 1;
@@ -174,21 +178,22 @@ export default function App() {
     }
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
-      if (phase === PHASES.PLAYING) {
+      const p = phaseRef.current;
+      if (p === PHASES.PLAYING) {
         setPhase(PHASES.GUESSING);
         startTimer();
         return;
       }
-      if (phase === PHASES.GUESSING) {
+      if (p === PHASES.GUESSING) {
         revealAnswer();
         return;
       }
-      if (phase === PHASES.IDLE) {
+      if (p === PHASES.IDLE) {
         playCurrentRound();
       }
     }
     if (e.which === 49 || e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') {
-      if (phase === PHASES.GUESSING) {
+      if (phaseRef.current === PHASES.GUESSING) {
         e.preventDefault();
         if (audioRef.current) {
           audioRef.current.pause();
@@ -203,13 +208,14 @@ export default function App() {
       }
     }
     if (e.which === 50 || e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') {
-      if (phase === PHASES.GUESSING || phase === PHASES.REVEALED) {
+      const p = phaseRef.current;
+      if (p === PHASES.GUESSING || p === PHASES.REVEALED) {
         e.preventDefault();
         setOverlay('❌');
         return;
       }
     }
-    if ((e.key === 'n' || e.key === 'N') && phase === PHASES.REVEALED) {
+    if ((e.key === 'n' || e.key === 'N') && phaseRef.current === PHASES.REVEALED) {
       nextRound();
     }
     if (e.key === 'Escape' && screen === 'game') {
@@ -217,12 +223,14 @@ export default function App() {
       setGameSongs(null);
       return;
     }
-  }, [screen, phase, startGame, startTimer, revealAnswer, playCurrentRound, stopAudio, stopTimer, nextRound]);
+  }, [screen, startGame, startTimer, revealAnswer, playCurrentRound, stopAudio, stopTimer, nextRound]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
 
   useEffect(() => {
     if (!overlay) return;
