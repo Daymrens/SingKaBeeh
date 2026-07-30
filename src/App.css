@@ -340,7 +340,7 @@
 .admin-gear:hover { opacity: 1; }
 
 .admin-screen {
-  padding: 0 !important; overflow: hidden;
+  padding: 0 !important; overflow: hidden; align-items: stretch; justify-content: flex-start;
 }
 .admin-header {
   display: flex; justify-content: space-between; align-items: center;
