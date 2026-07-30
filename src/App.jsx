@@ -213,7 +213,7 @@ export default function App() {
       if (elapsed < 2200) { frame = requestAnimationFrame(spin); return; }
       if (stopRoll) try { stopRoll(); } catch {}
       setGenreDisplay(target);
-      setTimeout(() => { setGenrePicker(false); playCurrentRoundRef.current(); }, 300);
+      setTimeout(() => { setGenrePicker(false); playCurrentRoundRef.current(); }, 3000);
     };
     frame = requestAnimationFrame(spin);
     return () => { cancelAnimationFrame(frame); if (stopRoll) try { stopRoll(); } catch {} };
