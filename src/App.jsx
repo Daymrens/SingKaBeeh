@@ -37,6 +37,7 @@ export default function App() {
   const [countdown, setCountdown] = useState(null);
   const [genrePicker, setGenrePicker] = useState(false);
   const [genreDisplay, setGenreDisplay] = useState('');
+  const playCurrentRoundRef = useRef(playCurrentRound);
   const genreTargetRef = useRef(null);
   const genreItemsRef = useRef([]);
   const [adminPass, setAdminPass] = useState('');
@@ -194,6 +195,10 @@ export default function App() {
   }, [countdown, startGenrePicker, song]);
 
   useEffect(() => {
+    playCurrentRoundRef.current = playCurrentRound;
+  });
+
+  useEffect(() => {
     if (!genrePicker) return;
     let stopRoll = null;
     try { stopRoll = playRollSound(); } catch {}
@@ -208,11 +213,11 @@ export default function App() {
       if (elapsed < 2200) { frame = requestAnimationFrame(spin); return; }
       if (stopRoll) try { stopRoll(); } catch {}
       setGenreDisplay(target);
-      setTimeout(() => { setGenrePicker(false); playCurrentRound(); }, 300);
+      setTimeout(() => { setGenrePicker(false); playCurrentRoundRef.current(); }, 300);
     };
     frame = requestAnimationFrame(spin);
     return () => { cancelAnimationFrame(frame); if (stopRoll) try { stopRoll(); } catch {} };
-  }, [genrePicker, playCurrentRound]);
+  }, [genrePicker]);
 
   const nextRound = useCallback(() => {
     const next = round + 1;
