@@ -166,7 +166,7 @@ const DEFAULT_SONGS = [
     "title": "Watermelon Sugar",
     "artist": "Harry Styles",
     "file": "Clips/song-19.wav",
-    "lyrics": "Breathe me in, breathe me out\nI don't know if I could ever go without\n____",
+    "lyrics": "Breathe me in, breathe me out\nI don't know if I could\n____",
     "answer": "ever go without",
     "hint": "Pop Rock"
   },
