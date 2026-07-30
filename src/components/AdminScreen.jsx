@@ -86,9 +86,6 @@ function SongEditor({ song, onChange, songs, onSave }) {
   const [cropBlob, setCropBlob] = useState(null);
   const [waveformLoaded, setWaveformLoaded] = useState(false);
 const [playing, setPlaying] = useState(false);
-  const [ytUrl, setYtUrl] = useState('');
-  const [ytLoading, setYtLoading] = useState(false);
-  const [ytError, setYtError] = useState('');
   const waveRef = useRef(null);
   const waveSurferRef = useRef(null);
 
@@ -135,28 +132,6 @@ const [playing, setPlaying] = useState(false);
     setCropEnd(0);
     const url = URL.createObjectURL(file);
     initWaveSurfer(url);
-  };
-
-  const handleYtDownload = async () => {
-    setYtLoading(true);
-    setYtError('');
-    try {
-      const cleanUrl = ytUrl.trim();
-      const res = await fetch(`/api/ytdl?url=${encodeURIComponent(cleanUrl)}`);
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || `Server error (${res.status})`); }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      setAudioFile(blob);
-      setCropBlob(null);
-      setCropStart(0);
-      setCropEnd(0);
-      initWaveSurfer(url);
-      setYtUrl('');
-    } catch (e) {
-      setYtError(e.message);
-    } finally {
-      setYtLoading(false);
-    }
   };
 
   const handleCrop = async () => {
@@ -206,16 +181,6 @@ const [playing, setPlaying] = useState(false);
             📂 Upload MP3 / WAV
             <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={handleUpload} />
           </label>
-        </div>
-
-        <div className="cropper-yt">
-          <div className="yt-input-row">
-            <input type="text" placeholder="Paste YouTube URL…" value={ytUrl}
-              onChange={e => { setYtUrl(e.target.value); setYtError(''); }} />
-            <button className="btn btn-secondary btn-small" disabled={!ytUrl || ytLoading}
-              onClick={handleYtDownload}>{ytLoading ? '⏳ Downloading…' : '▶ Download'}</button>
-          </div>
-          {ytError && <p className="yt-error">{ytError}</p>}
         </div>
 
         <div ref={waveRef} className="waveform-container"></div>

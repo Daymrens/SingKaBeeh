@@ -419,11 +419,6 @@
 .crop-buttons { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .crop-success { color: #00b894; font-size: 0.85rem; margin-top: 0.5rem; }
 .cropper-existing { font-size: 0.85rem; color: #a0a0cc; }
-.cropper-yt { margin-top: 0.5rem; }
-.cropper-yt .yt-input-row { display: flex; gap: 0.5rem; }
-.cropper-yt input { flex: 1; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: #fff; font-family: inherit; font-size: 0.85rem; outline: none; }
-.cropper-yt input:focus { border-color: #ffd700; }
-.yt-error { color: #ff6b6b; font-size: 0.8rem; margin-top: 0.3rem; }
 
 @media (max-width: 700px) {
   #app { padding: 1rem; }
