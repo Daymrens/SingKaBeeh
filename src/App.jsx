@@ -12,6 +12,13 @@ import './App.css';
 
 const GUESS_TIME = 5;
 const PHASES = { IDLE: 'idle', PLAYING: 'playing', GUESSING: 'guessing', REVEALED: 'revealed' };
+const GENRE_POOL = [
+  '🎸 Rock', '🎤 Pop', '🎹 EDM', '🎻 Classical', '🎷 Jazz', '🎧 Hip Hop',
+  '🎵 R&B', '🎶 Soul', '🪘 Funk', '🎸 Indie', '🎤 K-Pop', '🇵🇭 OPM',
+  '🎸 Metal', '🎹 Disco', '🎤 Ballad', '🎧 Rap', '🎵 Reggae', '🎻 Blues',
+  '🎸 Punk', '🎤 Folk', '🎹 Synth', '🎧 Trap', '🎵 Country', '🎶 Gospel',
+  '🎸 Grunge', '🎤 House', '🎹 Techno', '🎧 Lo-Fi', '🎵 Latin', '🎶 Bossa',
+];
 
 export default function App() {
   const [screen, setScreen] = useState('title');
@@ -28,6 +35,7 @@ export default function App() {
   const [showTimesUp, setShowTimesUp] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [countdown, setCountdown] = useState(null);
+  const [genrePicker, setGenrePicker] = useState(null);
   const [adminPass, setAdminPass] = useState('');
   const [adminError, setAdminError] = useState(false);
 
@@ -95,6 +103,7 @@ export default function App() {
     }
     stopAudio();
     setCountdown(3);
+    setGenrePicker(null);
   }, [songs, stopTimer, stopAudio]);
 
   const handleSaveSongs = useCallback((updated) => {
@@ -166,13 +175,16 @@ export default function App() {
 
   const nextRound = useCallback(() => {
     const next = round + 1;
-    if (next >= (gameSongs || songs).length) {
+    const list = gameSongs || songs;
+    if (next >= list.length) {
       setScreen('title');
       setGameSongs(null);
       return;
     }
-    loadRound(gameSongs || songs, next);
-  }, [round, gameSongs, songs, loadRound]);
+    const hint = list[next]?.hint;
+    loadRound(list, next);
+    setTimeout(() => startGenrePicker(hint), 0);
+  }, [round, gameSongs, songs, loadRound, startGenrePicker]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && screen === 'title') {
@@ -236,12 +248,36 @@ export default function App() {
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
 
+  const startGenrePicker = useCallback((hint) => {
+    const target = hint || '🎵 Music';
+    const items = [target, ...GENRE_POOL.filter(g => g !== target)];
+    setGenrePicker({ target, items });
+  }, []);
+
   useEffect(() => {
     if (countdown === null) return;
-    if (countdown <= 0) { setCountdown(null); playCurrentRound(); return; }
+    if (countdown <= 0) { setCountdown(null); startGenrePicker(song?.hint); return; }
     const t = setTimeout(() => setCountdown(countdown - 1), 1000);
     return () => clearTimeout(t);
-  }, [countdown, playCurrentRound]);
+  }, [countdown, startGenrePicker, song]);
+
+  useEffect(() => {
+    if (!genrePicker) return;
+    const { target, items } = genrePicker;
+    let i = 0, delay = 50;
+    const spin = () => {
+      i++;
+      const display = items[i % items.length];
+      setGenrePicker(p => ({ ...p, display }));
+      if (display === target && i > items.length * 2) {
+        setTimeout(() => { setGenrePicker(null); playCurrentRound(); }, 800);
+        return;
+      }
+      delay = Math.min(delay + 25, 300);
+      setTimeout(spin, delay);
+    };
+    spin();
+  }, [genrePicker, playCurrentRound]);
 
   useEffect(() => {
     if (!overlay) return;
@@ -297,6 +333,14 @@ export default function App() {
       {countdown !== null && (
         <div className="countdown-overlay">
           <div className="countdown-number" key={countdown}>{countdown > 0 ? countdown : '🎤'}</div>
+        </div>
+      )}
+      {genrePicker && (
+        <div className="countdown-overlay">
+          <div className="genre-picker">
+            <div className="genre-label">🎵 Category</div>
+            <div className="genre-display">{genrePicker.display || genrePicker.target}</div>
+          </div>
         </div>
       )}
 
