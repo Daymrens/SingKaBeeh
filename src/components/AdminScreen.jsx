@@ -86,6 +86,8 @@ function SongEditor({ song, onChange, songs, onSave }) {
   const [cropBlob, setCropBlob] = useState(null);
   const [waveformLoaded, setWaveformLoaded] = useState(false);
 const [playing, setPlaying] = useState(false);
+  const [prevPlaying, setPrevPlaying] = useState(false);
+  const previewRef = useRef(null);
   const waveRef = useRef(null);
   const waveSurferRef = useRef(null);
 
@@ -218,7 +220,7 @@ const [playing, setPlaying] = useState(false);
             <p>Existing audio: <strong>{song.file}</strong></p>
             <div className="crop-buttons">
               <button className="btn btn-secondary btn-small"
-                onClick={() => { const a = new Audio(song.file); a.play(); }}>▶ Preview</button>
+                onClick={() => { if (previewRef.current) { previewRef.current.pause(); previewRef.current = null; setPrevPlaying(false); } else { const a = new Audio(song.file); a.onended = () => setPrevPlaying(false); a.play(); previewRef.current = a; setPrevPlaying(true); } }}>{prevPlaying ? '⏹ Stop' : '▶ Play'}</button>
               <button className="btn btn-secondary btn-small"
                 onClick={() => initWaveSurfer(song.file)}>Load Waveform</button>
             </div>
