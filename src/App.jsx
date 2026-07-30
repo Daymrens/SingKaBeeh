@@ -189,19 +189,18 @@ export default function App() {
   useEffect(() => {
     if (!genrePicker) return;
     const { target, items } = genrePicker;
-    let i = 0, delay = 50;
+    const start = Date.now();
+    let frame;
     const spin = () => {
-      i++;
-      const display = items[i % items.length];
-      setGenrePicker(p => ({ ...p, display }));
-      if (display === target && i > items.length * 2) {
-        setTimeout(() => { setGenrePicker(null); playCurrentRound(); }, 800);
-        return;
-      }
-      delay = Math.min(delay + 25, 300);
-      setTimeout(spin, delay);
+      const elapsed = Date.now() - start;
+      const idx = Math.floor(elapsed / 60) % items.length;
+      setGenrePicker(p => ({ ...p, display: items[idx] }));
+      if (elapsed < 2000) { frame = requestAnimationFrame(spin); return; }
+      setGenrePicker(p => ({ ...p, display: target }));
+      setTimeout(() => { setGenrePicker(null); playCurrentRound(); }, 600);
     };
-    spin();
+    frame = requestAnimationFrame(spin);
+    return () => cancelAnimationFrame(frame);
   }, [genrePicker, playCurrentRound]);
 
   const nextRound = useCallback(() => {
@@ -339,7 +338,9 @@ export default function App() {
         <div className="countdown-overlay">
           <div className="genre-picker">
             <div className="genre-label">🎵 Category</div>
-            <div className="genre-display">{genrePicker.display || genrePicker.target}</div>
+            <div className={`genre-display${genrePicker.display === genrePicker.target ? ' landed' : ' spinning'}`}>
+              {genrePicker.display || genrePicker.target}
+            </div>
           </div>
         </div>
       )}

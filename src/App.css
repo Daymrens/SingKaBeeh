@@ -437,7 +437,14 @@
 }
 .genre-picker { text-align: center; animation: countPop 0.3s ease-out; }
 .genre-label { font-size: 1.2rem; color: #a0a0cc; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 3px; }
-.genre-display { font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.genre-display { font-size: 3.5rem; font-weight: 900; }
+.genre-display.spinning { animation: genreSpin 0.06s linear infinite; }
+.genre-display.landed { background: linear-gradient(135deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: countPop 0.3s ease-out; }
+@keyframes genreSpin {
+  0% { transform: translateY(-5px) scale(0.95); opacity: 0.6; color: #a0a0cc; }
+  50% { transform: translateY(0) scale(1.05); opacity: 1; color: #ffd700; }
+  100% { transform: translateY(5px) scale(0.95); opacity: 0.6; color: #a0a0cc; }
+}
 
 @media (max-width: 700px) {
   #app { padding: 1rem; }
