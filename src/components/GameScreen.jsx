@@ -41,7 +41,7 @@ export default function GameScreen({ song, phase, timeLeft, audioProgress, onPla
             <div className="lyric-line revealed" style={{ marginTop: '0.8rem' }}>{sanitize(song.answer)}</div>
           )}
         </div>
-        <div className={`song-info ${phase === 'revealed' ? 'visible' : ''}`}>
+        <div className={`song-info ${phase !== 'idle' ? 'visible' : ''}`}>
           {song.title} — {song.artist}
         </div>
       </div>
