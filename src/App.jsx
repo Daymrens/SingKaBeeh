@@ -319,7 +319,7 @@ export default function App() {
     <div id="app">
       {screen === 'title' && <TitleScreen onStart={startGame} onAdmin={() => setShowAdminLogin(true)} />}
 
-      {screen === 'game' && !genrePicker && songWithLabel && (
+      {screen === 'game' && countdown === null && !genrePicker && songWithLabel && (
         <GameScreen
           song={songWithLabel}
           phase={phase}
