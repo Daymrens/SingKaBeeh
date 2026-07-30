@@ -204,10 +204,10 @@ export default function App() {
       const elapsed = Date.now() - start;
       const idx = Math.floor(elapsed / 60) % items.length;
       setGenreDisplay(items[idx]);
-      if (elapsed < 2000) { frame = requestAnimationFrame(spin); return; }
+      if (elapsed < 2200) { frame = requestAnimationFrame(spin); return; }
       stopRoll();
       setGenreDisplay(target);
-      setTimeout(() => { setGenrePicker(false); playCurrentRound(); }, 600);
+      setTimeout(() => { setGenrePicker(false); playCurrentRound(); }, 300);
     };
     frame = requestAnimationFrame(spin);
     return () => { cancelAnimationFrame(frame); stopRoll(); };
