@@ -99,7 +99,10 @@ const [playing, setPlaying] = useState(false);
   const waveSurferRef = useRef(null);
 
   useEffect(() => {
-    return () => { if (waveSurferRef.current) { waveSurferRef.current.destroy(); waveSurferRef.current = null; } };
+    return () => {
+      if (previewRef.current) { previewRef.current.pause(); previewRef.current = null; }
+      if (waveSurferRef.current) { waveSurferRef.current.destroy(); waveSurferRef.current = null; }
+    };
   }, []);
 
   useEffect(() => {
