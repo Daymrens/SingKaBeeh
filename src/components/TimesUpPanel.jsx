@@ -10,7 +10,6 @@ export default function TimesUpPanel({ onDismiss }) {
     <div className="timesup-panel" onClick={onDismiss}>
       <div className="box">
         <h2>⏰ Time's Up!</h2>
-        <button className="btn" onClick={onDismiss}>OK</button>
       </div>
     </div>
   );
