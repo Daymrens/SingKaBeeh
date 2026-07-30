@@ -20,8 +20,8 @@ const DEFAULT_SONGS = [
   {
     id: 4, title: "...Baby One More Time", artist: "Britney Spears",
     file: "Songs/song-04.mp3",
-    lyrics: "Show me how you want it to be\nTell me, baby, 'cause I need to know now\nOh, because",
-    answer: "Show me how you want it to be", hint: "90s Pop"
+    lyrics: "Show me how you want it to be\nTell me, baby, 'cause I need to know now\nOh, because\n____",
+    answer: "My loneliness is killing me (and I) I must confess I still believe (still believe)", hint: "90s Pop"
   },
   {
     id: 5, title: "Rolling in the Deep", artist: "Adele",
@@ -100,6 +100,186 @@ const DEFAULT_SONGS = [
     lyrics: "Ang pawis ko'y tumatagaktak\nSa bilis, may pumapalakpak\nAbutin natin ang langit, ibuka ang pakpak\nLanghapin ang halimuyak ng mga bulaklak\nAko ay paruparo, nakadapo sa'yong damo\n____",
     answer: "Sa liwanag ng ganda mo ang daming nabibighaning gamogamo\nYakapin mo ako habang atin ang gabi\nKasi mundo natin ay laging salisi\n'Pag ika'y nasa baba, ako ay nasa taas\nSa tuwing ikaw ay darating, ako ay lalabas",
     hint: "OPM Pop"
+  },
+  {
+    id: 17, title: "Blinding Lights", artist: "The Weeknd",
+    file: "Songs/song-17.mp3",
+    lyrics: "I've been tryna call, I've been on my own for long enough\nMaybe you can show me how to love\n____",
+    answer: "Maybe I'm going through withdrawals\nYou don't even have to do too much\nYou can turn off the lights, I don't need to touch", hint: "Synthpop"
+  },
+  {
+    id: 18, title: "Levitating", artist: "Dua Lipa",
+    file: "Songs/song-18.mp3",
+    lyrics: "If you wanna run away with me, I know a galaxy\nAnd I can take you for a ride\n____",
+    answer: "I had a premonition that we fell into a rhythm\nWhere the music don't stop for life\nGlitter in the sky, glitter in my eyes", hint: "Dance Pop"
+  },
+  {
+    id: 19, title: "Watermelon Sugar", artist: "Harry Styles",
+    file: "Songs/song-19.mp3",
+    lyrics: "Tastes like strawberries on a summer evenin'\nAnd it sounds just like a song\n____",
+    answer: "I want your belly and that summer feeling\nI don't know if I could ever go without", hint: "Pop Rock"
+  },
+  {
+    id: 20, title: "Someone Like You", artist: "Adele",
+    file: "Songs/song-20.mp3",
+    lyrics: "Nevermind, I'll find someone like you\nI wish nothing but the best for you, too\n____",
+    answer: "Don't forget me, I beg\nI'll remember you said\nSometimes it lasts in love, but sometimes it hurts instead", hint: "Pop Ballad"
+  },
+  {
+    id: 21, title: "Stay", artist: "The Kid LAROI & Justin Bieber",
+    file: "Songs/song-21.mp3",
+    lyrics: "I do the same thing, I told you that I never would\nI told you I changed, even when I knew I never could\n____",
+    answer: "I know that I can't find nobody else as good as you\nI need you to stay, need you to stay, hey", hint: "Pop"
+  },
+  {
+    id: 22, title: "Sunflower", artist: "Post Malone & Swae Lee",
+    file: "Songs/song-22.mp3",
+    lyrics: "Needless to say, I keep her in check\nShe was all bad-bad, nevertheless\n____",
+    answer: "Callin' it quits now, baby, I'm a wreck\nCrash at my place, baby, you're a wreck", hint: "Hip Hop Pop"
+  },
+  {
+    id: 23, title: "All of Me", artist: "John Legend",
+    file: "Songs/song-23.mp3",
+    lyrics: "'Cause all of me loves all of you\nLove your curves and all your edges\nAll your perfect imperfections\n____",
+    answer: "Give your all to me\nI'll give my all to you\nYou're my end and my beginning", hint: "R&B Ballad"
+  },
+  {
+    id: 24, title: "Despacito", artist: "Luis Fonsi & Daddy Yankee",
+    file: "Songs/song-24.mp3",
+    lyrics: "Quiero respirar tu cuello despacito\nDeja que te diga cosas al oído\n____",
+    answer: "Para que te acuerdes si no estás conmigo\nDespacito, quiero desnudarte a besos despacito", hint: "Latin Pop"
+  },
+  {
+    id: 25, title: "Shallow", artist: "Lady Gaga & Bradley Cooper",
+    file: "Songs/song-25.mp3",
+    lyrics: "I'm off the deep end, watch as I dive in\nI'll never meet the ground\nCrash through the surface where they can't hurt us\n____",
+    answer: "We're far from the shallow now", hint: "Pop Rock"
+  },
+  {
+    id: 26, title: "Smells Like Teen Spirit", artist: "Nirvana",
+    file: "Songs/song-26.mp3",
+    lyrics: "Load up on guns, bring your friends\nIt's fun to lose and to pretend\n____",
+    answer: "She's over-bored and self-assured\nOh no, I know a dirty word", hint: "90s Grunge"
+  },
+  {
+    id: 27, title: "Sweet Child o' Mine", artist: "Guns N' Roses",
+    file: "Songs/song-27.mp3",
+    lyrics: "She's got a smile that it seems to me\nReminds me of childhood memories\nWhere everything was as fresh as the bright blue sky\n____",
+    answer: "Now and then when I see her face\nShe takes me away to that special place", hint: "80s Rock"
+  },
+  {
+    id: 28, title: "Billie Jean", artist: "Michael Jackson",
+    file: "Songs/song-28.mp3",
+    lyrics: "Billie Jean is not my lover\nShe's just a girl who claims that I am the one\n____",
+    answer: "But the kid is not my son\nShe says I am the one, but the kid is not my son", hint: "80s Pop"
+  },
+  {
+    id: 29, title: "Get Lucky", artist: "Daft Punk ft. Pharrell Williams",
+    file: "Songs/song-29.mp3",
+    lyrics: "Like the legend of the phoenix\nAll ends with beginnings\nWhat keeps the planet spinning\nThe force from the beginning\n____",
+    answer: "We've come too far to give up who we are\nSo let's raise the bar and our cups to the stars", hint: "Funk Disco"
+  },
+  {
+    id: 30, title: "Happy", artist: "Pharrell Williams",
+    file: "Songs/song-30.mp3",
+    lyrics: "Clap along if you feel like a room without a roof\nClap along if you feel like happiness is the truth\n____",
+    answer: "Clap along if you know what happiness is to you\nClap along if you feel like that's what you wanna do", hint: "Pop"
+  },
+  {
+    id: 31, title: "Drivers License", artist: "Olivia Rodrigo",
+    file: "Songs/song-31.mp3",
+    lyrics: "I got my driver's license last week\nJust like we always talked about\n'Cause you were so excited for me\nTo finally drive up to your house\n____",
+    answer: "But today I drove through the suburbs\nCryin' 'cause you weren't around", hint: "Alt Pop"
+  },
+  {
+    id: 32, title: "Sunkissed", artist: "Lola Amour",
+    file: "Songs/song-32.mp3",
+    lyrics: "Sabi ko sa sarili ko 'wag nang umasa pa\nNgunit ba't 'di ko mapigilan\n____",
+    answer: "Ang pusong nagwawala\nLaman ka ng aking panaginip\nSana'y 'di ka na magising pa", hint: "OPM Pop"
+  },
+  {
+    id: 33, title: "Tadhana", artist: "Up Dharma Down",
+    file: "Songs/song-33.mp3",
+    lyrics: "Malay mo, nakatakda\nAng pag-ibig nating dalawa\nBawat saglit na lumilipas\nSana'y 'di ka na magbabalik pa\n____",
+    answer: "Ang hiling ko lang naman\nAy ang makapiling ka\nSa'king paggising, ika'y nariyan pa", hint: "OPM Alternative"
+  },
+  {
+    id: 34, title: "Kahit Ayaw Mo Na", artist: "This Band",
+    file: "Songs/song-34.mp3",
+    lyrics: "Wag mo sanang isipin na ako'y nagbago\nAng pag-ibig ko sa'yo ay hindi naglaho\n____",
+    answer: "Kahit ayaw mo na, kahit ayaw mo na\nAko'y mananatili pa rin\nMaghihintay sa'yo hanggang sa huling sandali", hint: "OPM Pop"
+  },
+  {
+    id: 35, title: "214", artist: "Rivermaya",
+    file: "Songs/song-35.mp3",
+    lyrics: "Kanino ka pa babaling\nKung ako'y iyong iiwan\n____",
+    answer: "Ang puso ko'y nabibiyak\nSa bawat awit na aking natutunan\nHindi ko masabi ang nararamdaman", hint: "OPM Rock"
+  },
+  {
+    id: 36, title: "With a Smile", artist: "Eraserheads",
+    file: "Songs/song-36.mp3",
+    lyrics: "Lift your head, baby, don't be scared\nOf the things that could go wrong along the way\nYou'll get by with a smile\n____",
+    answer: "Now you can't be sure when you're not feelin' right\nLife takes its toll on you, but you'll make it through", hint: "OPM Rock"
+  },
+  {
+    id: 37, title: "Halaga", artist: "Parokya ni Edgar",
+    file: "Songs/song-37.mp3",
+    lyrics: "Hindi ko alam kung bakit\nIkaw ang napili ng puso ko\nSa dami ng aking nakilala\n____",
+    answer: "Ikaw lang ang nagpabago sa aking mundo\nIkaw ang aking halaga", hint: "OPM Pop"
+  },
+  {
+    id: 38, title: "Bakit Pa Ba", artist: "Jay R",
+    file: "Songs/song-38.mp3",
+    lyrics: "Bakit pa ba sasabihin?\nKung 'di naman pala sigurado\n____",
+    answer: "Nasaktan mo na naman ako\nHindi ko na alam kung saan pupunta\n'wag mo sanang sabihin sa akin", hint: "OPM R&B"
+  },
+  {
+    id: 39, title: "Pangarap Lang Kita", artist: "Parokya ni Edgar",
+    file: "Songs/song-39.mp3",
+    lyrics: "Kung akin lang ang mundo\nGagawin kong ikaw ang aking sinta\n____",
+    answer: "Ngunit panahon ay 'di pabor sa akin\nPangarap lang kita, pangarap lang talaga", hint: "OPM Pop"
+  },
+  {
+    id: 40, title: "Wag Mo Na Sana", artist: "Rio feat. Arthur Nery",
+    file: "Songs/song-40.mp3",
+    lyrics: "Wag mo na sana sanaying\nAko'y iyong hanapin pa\n____",
+    answer: "Kung ang puso mo ay may iba na\nWag mo na sana sanaying\nMahalin mo pa ako", hint: "OPM Ballad"
+  },
+  {
+    id: 41, title: "Dati", artist: "Quest feat. Abra",
+    file: "Songs/song-41.mp3",
+    lyrics: "Lumipas ang maraming gabi\nNgunit ba't 'di ka pa rin magunaw sa aking isip?\n____",
+    answer: "Ang init ng kape at ang lamig ng simoy ng hangin\nHabang ako'y nag-iisa at alaala mo'y gumuguhit", hint: "OPM Hip Hop"
+  },
+  {
+    id: 42, title: "Pagsamo", artist: "Arthur Nery",
+    file: "Songs/song-42.mp3",
+    lyrics: "Bakit 'di na lang ako ang iyong mahalin?\nBakit ba 'di na lang ako ang iyong piliin?\n____",
+    answer: "Handa na ba ang puso mo?\nO ako na lang, oh, ako na lang\nAko na lang sana, aking sinta", hint: "OPM R&B"
+  },
+  {
+    id: 43, title: "Sa Susunod Na Lang", artist: "SUD",
+    file: "Songs/song-43.mp3",
+    lyrics: "Sa susunod na lang\nKung sakaling magtagpo man ang ating mga daan\n____",
+    answer: "Huwag kang mag-alala, aking sinta\nSa susunod na lang kung magkita man tayo", hint: "OPM Alternative"
+  },
+  {
+    id: 44, title: "Leaves", artist: "Ben&Ben",
+    file: "Songs/song-44.mp3",
+    lyrics: "Stay with me, hold my hand\nThere's no need to be afraid\nI'll be here by your side\n____",
+    answer: "Even if the leaves fall down\nEven if the skies turn gray\nI'll be here holding on", hint: "OPM Folk Pop"
+  },
+  {
+    id: 45, title: "Kathang Isip", artist: "Ben&Ben",
+    file: "Songs/song-45.mp3",
+    lyrics: "Ang awit na ito ay para sa iyo\nMga gunita na puno ng kulay\n____",
+    answer: "Kung akin ka lang sana sa aking tabi\nHindi na maglalaho ang ngiti\nSa bawat sandaling ika'y kapiling", hint: "OPM Folk Pop"
+  },
+  {
+    id: 46, title: "Pasilyo", artist: "SunKissed Lola",
+    file: "Songs/song-46.mp3",
+    lyrics: "Sa bawat araw na ika'y aking nakikita\nAng mundo ko ay nabubuhay\n____",
+    answer: "Sa 'yong mga mata, natagpuan ko ang tahanan\nIkaw ang aking pasilyo patungo sa walang hanggan", hint: "OPM Pop"
   }
 ];
 
