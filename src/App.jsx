@@ -35,7 +35,10 @@ export default function App() {
   const [showTimesUp, setShowTimesUp] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [countdown, setCountdown] = useState(null);
-  const [genrePicker, setGenrePicker] = useState(null);
+  const [genrePicker, setGenrePicker] = useState(false);
+  const [genreDisplay, setGenreDisplay] = useState('');
+  const genreTargetRef = useRef(null);
+  const genreItemsRef = useRef([]);
   const [adminPass, setAdminPass] = useState('');
   const [adminError, setAdminError] = useState(false);
 
@@ -73,6 +76,8 @@ export default function App() {
     setShowConfetti(false);
     setOverlay(null);
     setCountdown(null);
+    setGenrePicker(false);
+    setGenreDisplay('');
     stopTimer();
     if (audioRef.current) {
       audioRef.current.pause();
@@ -103,7 +108,7 @@ export default function App() {
     }
     stopAudio();
     setCountdown(3);
-    setGenrePicker(null);
+    setGenrePicker(false);
   }, [songs, stopTimer, stopAudio]);
 
   const handleSaveSongs = useCallback((updated) => {
@@ -175,8 +180,10 @@ export default function App() {
 
   const startGenrePicker = useCallback((hint) => {
     const target = hint || '🎵 Music';
-    const items = [target, ...GENRE_POOL.filter(g => g !== target)];
-    setGenrePicker({ target, items });
+    genreTargetRef.current = target;
+    genreItemsRef.current = [target, ...GENRE_POOL.filter(g => g !== target)];
+    setGenrePicker(true);
+    setGenreDisplay('');
   }, []);
 
   useEffect(() => {
@@ -188,16 +195,17 @@ export default function App() {
 
   useEffect(() => {
     if (!genrePicker) return;
-    const { target, items } = genrePicker;
+    const target = genreTargetRef.current;
+    const items = genreItemsRef.current;
     const start = Date.now();
     let frame;
     const spin = () => {
       const elapsed = Date.now() - start;
       const idx = Math.floor(elapsed / 60) % items.length;
-      setGenrePicker(p => ({ ...p, display: items[idx] }));
+      setGenreDisplay(items[idx]);
       if (elapsed < 2000) { frame = requestAnimationFrame(spin); return; }
-      setGenrePicker(p => ({ ...p, display: target }));
-      setTimeout(() => { setGenrePicker(null); playCurrentRound(); }, 600);
+      setGenreDisplay(target);
+      setTimeout(() => { setGenrePicker(false); playCurrentRound(); }, 600);
     };
     frame = requestAnimationFrame(spin);
     return () => cancelAnimationFrame(frame);
@@ -267,6 +275,7 @@ export default function App() {
     if (e.key === 'Escape' && screen === 'game') {
       setScreen('title');
       setGameSongs(null);
+      setGenrePicker(false);
       return;
     }
   }, [screen, startGame, startTimer, revealAnswer, playCurrentRound, stopAudio, stopTimer, nextRound]);
@@ -338,8 +347,8 @@ export default function App() {
         <div className="countdown-overlay">
           <div className="genre-picker">
             <div className="genre-label">🎵 Category</div>
-            <div className={`genre-display${genrePicker.display === genrePicker.target ? ' landed' : ' spinning'}`}>
-              {genrePicker.display || genrePicker.target}
+            <div className={`genre-display${genreDisplay === genreTargetRef.current ? ' landed' : ' spinning'}`}>
+              {genreDisplay}
             </div>
           </div>
         </div>
