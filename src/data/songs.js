@@ -76,8 +76,8 @@ const DEFAULT_SONGS = [
     "title": "Shake It Off",
     "artist": "Taylor Swift",
     "file": "Songs/song-09.mp3",
-    "lyrics": "My ex-man brought his new girlfriend\n____",
-    "answer": "She's like, Oh my God, but I'm just gonna shake",
+    "lyrics": "My ex-man brought his new girlfriend She's like, Oh my God,\n____",
+    "answer": "but I'm just gonna shake",
     "hint": "2010s Pop"
   },
   {
