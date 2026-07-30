@@ -2,9 +2,15 @@ import { sanitize } from '../utils/helpers';
 
 const BLANK = '____';
 
+function lastWord(text) {
+  const words = text.trim().split(/[\s\n]+/);
+  return words.length ? words[words.length - 1].replace(/[^a-zA-Z0-9äëïöüñáéíóúàèìòù'’-]/g, '') : '';
+}
+
 export default function GameScreen({ song, phase, timeLeft, audioProgress, onPlay, onNext, onRevealClick }) {
   const lines = song.lyrics.split('\n');
   const hasBlank = lines.some(l => l.trim() === BLANK);
+  const hintWord = phase !== 'revealed' ? lastWord(song.answer) : '';
 
   return (
     <div className="screen active" style={{ display: 'flex' }}>
@@ -24,7 +30,7 @@ export default function GameScreen({ song, phase, timeLeft, audioProgress, onPla
         <div className="lyrics-text visible">
           {lines.map((line, i) => {
             if (line.trim() === BLANK && phase !== 'revealed') {
-              return <div key={i} className="lyric-line blank-line">________________</div>;
+              return <div key={i} className="lyric-line blank-line">________________{hintWord ? <span className="blank-hint"> … <span className="last-word">{hintWord}</span></span> : ''}</div>;
             }
             if (line.trim() === BLANK && phase === 'revealed') {
               return <div key={i} className="lyric-line revealed">{sanitize(song.answer)}</div>;
