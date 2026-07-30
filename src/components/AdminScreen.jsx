@@ -4,7 +4,7 @@ import RegionsPlugin from 'wavesurfer.js/plugins/regions';
 import { saveSongs, exportSongs, importSongs } from '../utils/adminStorage';
 import { cropAudio } from '../utils/wavEncoder';
 
-export default function AdminScreen({ songs, onSave, onBack }) {
+export default function AdminScreen({ songs, defaultSongs, onSave, onBack }) {
   const [editingId, setEditingId] = useState(null);
   const [dirty, setDirty] = useState(false);
   const [search, setSearch] = useState('');
@@ -56,6 +56,7 @@ export default function AdminScreen({ songs, onSave, onBack }) {
                 e.target.value = '';
               }} />
           </label>
+          <button className="btn btn-danger btn-small" onClick={() => { if (confirm('Reset all songs to defaults? This will overwrite your current songs.')) { onSave([...defaultSongs]); setEditingId(null); } }}>🔄 Reset</button>
           <button className="btn btn-secondary btn-small" onClick={onBack}>✕ Close</button>
         </div>
       </div>
