@@ -31,6 +31,20 @@ export function playRing() {
   } catch (_) {}
 }
 
+export function playRollSound() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const g = ctx.createGain();
+  g.connect(ctx.destination);
+  g.gain.value = 0.08;
+  const o = ctx.createOscillator();
+  o.type = 'sawtooth';
+  o.frequency.value = 800;
+  o.frequency.linearRampToValueAtTime(200, ctx.currentTime + 2);
+  o.connect(g);
+  o.start();
+  return () => { try { o.stop(); ctx.close(); } catch {} };
+}
+
 export function playSound(type) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();

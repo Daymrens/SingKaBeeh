@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import DEFAULT_SONGS, { shuffleArray } from './data/songs';
 import { loadSongs, saveSongs } from './utils/adminStorage';
-import { playTick, playRing, playSound } from './utils/sounds';
+import { playTick, playRing, playSound, playRollSound } from './utils/sounds';
 import TitleScreen from './components/TitleScreen';
 import GameScreen from './components/GameScreen';
 import AdminScreen from './components/AdminScreen';
@@ -195,6 +195,7 @@ export default function App() {
 
   useEffect(() => {
     if (!genrePicker) return;
+    const stopRoll = playRollSound();
     const target = genreTargetRef.current;
     const items = genreItemsRef.current;
     const start = Date.now();
@@ -204,11 +205,12 @@ export default function App() {
       const idx = Math.floor(elapsed / 60) % items.length;
       setGenreDisplay(items[idx]);
       if (elapsed < 2000) { frame = requestAnimationFrame(spin); return; }
+      stopRoll();
       setGenreDisplay(target);
       setTimeout(() => { setGenrePicker(false); playCurrentRound(); }, 600);
     };
     frame = requestAnimationFrame(spin);
-    return () => cancelAnimationFrame(frame);
+    return () => { cancelAnimationFrame(frame); stopRoll(); };
   }, [genrePicker, playCurrentRound]);
 
   const nextRound = useCallback(() => {
