@@ -108,7 +108,7 @@ export default function App() {
       audioRef.current = null;
     }
     stopAudio();
-    setCountdown(3);
+    setCountdown(1);
     setGenrePicker(false);
   }, [songs, stopTimer, stopAudio]);
 
@@ -348,7 +348,7 @@ export default function App() {
       {overlay && <OverlayIcon emoji={overlay} />}
       {countdown !== null && (
         <div className="countdown-overlay">
-          <div className="countdown-number" key={countdown}>{countdown > 0 ? countdown : '🎤'}</div>
+          <div className="countdown-number" key={countdown}>Let's play</div>
         </div>
       )}
       {genrePicker && (
