@@ -173,10 +173,11 @@ export default function App() {
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && screen === 'title') {
+      e.preventDefault();
       startGame();
       return;
     }
-    if (e.key === ' ' || e.key === 'Space') {
+    if ((e.key === ' ' || e.key === 'Space') && screen === 'game') {
       e.preventDefault();
       const p = phaseRef.current;
       if (p === PHASES.PLAYING) {
@@ -192,7 +193,7 @@ export default function App() {
         playCurrentRound();
       }
     }
-    if (e.which === 49 || e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') {
+    if ((e.which === 49 || e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') && screen === 'game') {
       if (phaseRef.current === PHASES.GUESSING) {
         e.preventDefault();
         if (audioRef.current) {
@@ -207,7 +208,7 @@ export default function App() {
         return;
       }
     }
-    if (e.which === 50 || e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') {
+    if ((e.which === 50 || e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') && screen === 'game') {
       const p = phaseRef.current;
       if (p === PHASES.GUESSING || p === PHASES.REVEALED) {
         e.preventDefault();
@@ -215,7 +216,7 @@ export default function App() {
         return;
       }
     }
-    if ((e.key === 'n' || e.key === 'N') && phaseRef.current === PHASES.REVEALED) {
+    if ((e.key === 'n' || e.key === 'N') && screen === 'game' && phaseRef.current === PHASES.REVEALED) {
       nextRound();
     }
     if (e.key === 'Escape' && screen === 'game') {
