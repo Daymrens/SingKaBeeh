@@ -9,12 +9,12 @@ const DEFAULT_SONGS = [
     "hint": "PPop Girl Group"
   },
   {
-    "id": 2,
+   "id": 2,
     "title": "Bohemian Rhapsody",
     "artist": "Queen",
     "file": "Songs/song-02.mp3",
-    "lyrics": "Is this the real life?\nIs this just fantasy?\n____",
-    "answer": "Caught in a landslide, no escape from reality",
+    "lyrics": "Too late, my time has come\nSends shivers down my spine, body's aching all the time\n____",
+    "answer": "Goodbye, everybody, I've got to go",
     "hint": "70s Rock Opera"
   },
   {
@@ -84,7 +84,7 @@ const DEFAULT_SONGS = [
     "id": 10,
     "title": "Eye of the Tiger",
     "artist": "Survivor",
-    "file": "Songs/song-10.mp3",
+    "file": "Clips/song-10.wav",
     "lyrics": "Risin' up, back on the street\nDid my time, took my chances\n____",
     "answer": "Went the distance, now I'm back on my feet, just a man and his will to survive",
     "hint": "80s Rock"
