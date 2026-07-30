@@ -240,12 +240,6 @@ const DEFAULT_SONGS = [
     answer: "Ngunit panahon ay 'di pabor sa akin\nPangarap lang kita, pangarap lang talaga", hint: "OPM Pop"
   },
   {
-    id: 40, title: "Wag Mo Na Sana", artist: "Rio feat. Arthur Nery",
-    file: "Clips/song-40.wav",
-    lyrics: "Wag mo na sana sanaying\nAko'y iyong hanapin pa\n____",
-    answer: "Kung ang puso mo ay may iba na\nWag mo na sana sanaying\nMahalin mo pa ako", hint: "OPM Ballad"
-  },
-  {
     id: 41, title: "Dati", artist: "Quest feat. Abra",
     file: "Clips/song-41.wav",
     lyrics: "Lumipas ang maraming gabi\nNgunit ba't 'di ka pa rin magunaw sa aking isip?\n____",
@@ -275,12 +269,6 @@ const DEFAULT_SONGS = [
     lyrics: "Ang awit na ito ay para sa iyo\nMga gunita na puno ng kulay\n____",
     answer: "Kung akin ka lang sana sa aking tabi\nHindi na maglalaho ang ngiti\nSa bawat sandaling ika'y kapiling", hint: "OPM Folk Pop"
   },
-  {
-    id: 46, title: "Pasilyo", artist: "SunKissed Lola",
-    file: "Clips/song-46.wav",
-    lyrics: "Sa bawat araw na ika'y aking nakikita\nAng mundo ko ay nabubuhay\n____",
-    answer: "Sa 'yong mga mata, natagpuan ko ang tahanan\nIkaw ang aking pasilyo patungo sa walang hanggan", hint: "OPM Pop"
-  }
 ];
 
 export function shuffleArray(arr) {

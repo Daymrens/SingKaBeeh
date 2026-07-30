@@ -384,9 +384,6 @@
 }
 .admin-del-btn:hover { opacity: 1; }
 
-.admin-content {
-  flex: 1; overflow-y: auto; padding: 1.5rem;
-}
 .admin-empty {
   display: flex; align-items: center; justify-content: center;
   height: 100%; color: #a0a0cc; font-size: 1.1rem;
