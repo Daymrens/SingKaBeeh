@@ -173,6 +173,37 @@ export default function App() {
     setOverlay(null);
   }, [stopAudio, stopTimer]);
 
+  const startGenrePicker = useCallback((hint) => {
+    const target = hint || '🎵 Music';
+    const items = [target, ...GENRE_POOL.filter(g => g !== target)];
+    setGenrePicker({ target, items });
+  }, []);
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown <= 0) { setCountdown(null); startGenrePicker(song?.hint); return; }
+    const t = setTimeout(() => setCountdown(countdown - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown, startGenrePicker, song]);
+
+  useEffect(() => {
+    if (!genrePicker) return;
+    const { target, items } = genrePicker;
+    let i = 0, delay = 50;
+    const spin = () => {
+      i++;
+      const display = items[i % items.length];
+      setGenrePicker(p => ({ ...p, display }));
+      if (display === target && i > items.length * 2) {
+        setTimeout(() => { setGenrePicker(null); playCurrentRound(); }, 800);
+        return;
+      }
+      delay = Math.min(delay + 25, 300);
+      setTimeout(spin, delay);
+    };
+    spin();
+  }, [genrePicker, playCurrentRound]);
+
   const nextRound = useCallback(() => {
     const next = round + 1;
     const list = gameSongs || songs;
@@ -247,37 +278,6 @@ export default function App() {
   }, [handleKeyDown]);
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
-
-  const startGenrePicker = useCallback((hint) => {
-    const target = hint || '🎵 Music';
-    const items = [target, ...GENRE_POOL.filter(g => g !== target)];
-    setGenrePicker({ target, items });
-  }, []);
-
-  useEffect(() => {
-    if (countdown === null) return;
-    if (countdown <= 0) { setCountdown(null); startGenrePicker(song?.hint); return; }
-    const t = setTimeout(() => setCountdown(countdown - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown, startGenrePicker, song]);
-
-  useEffect(() => {
-    if (!genrePicker) return;
-    const { target, items } = genrePicker;
-    let i = 0, delay = 50;
-    const spin = () => {
-      i++;
-      const display = items[i % items.length];
-      setGenrePicker(p => ({ ...p, display }));
-      if (display === target && i > items.length * 2) {
-        setTimeout(() => { setGenrePicker(null); playCurrentRound(); }, 800);
-        return;
-      }
-      delay = Math.min(delay + 25, 300);
-      setTimeout(spin, delay);
-    };
-    spin();
-  }, [genrePicker, playCurrentRound]);
 
   useEffect(() => {
     if (!overlay) return;
