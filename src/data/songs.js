@@ -1,4 +1,4 @@
-[
+const DEFAULT_SONGS = [
   {
     "id": 1,
     "title": "Pantropiko'",
@@ -395,4 +395,14 @@
     "answer": "Tatakbo papalayo, kakalimutan ang lahat\nOoh-ooh, ooh-ooh, ooh-ooh-ooh",
     "hint": "OPM Folk Pop"
   }
-]
+];
+
+export function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+export default DEFAULT_SONGS;
