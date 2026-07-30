@@ -456,6 +456,22 @@
   100% { transform: translateY(5px) scale(0.95); opacity: 0.6; color: #a0a0cc; }
 }
 
+.credits {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 0.8rem;
+  color: #a0a0cc;
+}
+.credits a {
+  color: #ffd700;
+  text-decoration: none;
+  font-weight: 600;
+}
+.credits a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 700px) {
   #app { padding: 1rem; }
   .admin-screen { max-height: calc(100vh - 2rem); }

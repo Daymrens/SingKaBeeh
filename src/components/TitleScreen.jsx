@@ -19,6 +19,9 @@ export default function TitleScreen({ onStart, onAdmin }) {
           </ol>
         </div>
       </div>
+      <div className="credits">
+        Credits to <a href="https://github.com/Daymrens" target="_blank" rel="noopener noreferrer">Dime👽</a>
+      </div>
     </div>
   );
 }
