@@ -251,21 +251,14 @@ export default function App() {
         return;
       }
       if (p === PHASES.IDLE) {
+        e.preventDefault();
         playCurrentRound();
       }
     }
     if ((e.which === 49 || e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') && screen === 'game') {
       if (phaseRef.current === PHASES.GUESSING) {
         e.preventDefault();
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current = null;
-        }
-        stopAudio();
-        stopTimer();
-        setShowConfetti(true);
-        playSound('correct');
-        setPhase(PHASES.REVEALED);
+        revealAnswer();
         return;
       }
     }
@@ -365,7 +358,7 @@ export default function App() {
       {showAdminLogin && (
         <div className="admin-login-overlay" onClick={() => { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); }}>
           <div className="admin-login-box" onClick={e => e.stopPropagation()}
-            onKeyDown={e => { if (e.key === 'Enter') { const ok = adminPass === '@dmin' || adminPass === '@dm1n'; if (ok) { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); setScreen('admin'); } else { setAdminError(true); } } }}>
+            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); const ok = adminPass === '@dmin' || adminPass === '@dm1n'; if (ok) { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); setScreen('admin'); } else { setAdminError(true); } } }}>
             <h2>🔐 Admin Access</h2>
             <input type="password" value={adminPass} autoFocus
               onChange={e => { setAdminPass(e.target.value); setAdminError(false); }}
