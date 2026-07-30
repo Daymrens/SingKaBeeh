@@ -340,7 +340,7 @@ export default function App() {
       )}
 
       {screen === 'admin' && (
-        <AdminScreen songs={songs} defaultSongs={DEFAULT_SONGS} onSave={handleSaveSongs} onBack={() => setScreen('title')} />
+        <AdminScreen songs={songs} onSave={handleSaveSongs} onBack={() => setScreen('title')} />
       )}
 
       {showConfetti && <Confetti />}
