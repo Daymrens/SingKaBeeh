@@ -37,7 +37,7 @@ export default function App() {
   const [countdown, setCountdown] = useState(null);
   const [genrePicker, setGenrePicker] = useState(false);
   const [genreDisplay, setGenreDisplay] = useState('');
-  const playCurrentRoundRef = useRef(playCurrentRound);
+  const playCurrentRoundRef = useRef(null);
   const genreTargetRef = useRef(null);
   const genreItemsRef = useRef([]);
   const [adminPass, setAdminPass] = useState('');
