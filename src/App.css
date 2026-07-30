@@ -429,6 +429,8 @@
 }
 .crop-buttons { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .crop-success { color: #00b894; font-size: 0.85rem; margin-top: 0.5rem; }
+.waveform-container [part*="region-handle"] { background: #ffd700 !important; border-radius: 3px !important; width: 4px !important; }
+.waveform-container [part="region-content"] { display: none !important; }
 .cropper-existing { font-size: 0.85rem; color: #a0a0cc; }
 
 .countdown-overlay {

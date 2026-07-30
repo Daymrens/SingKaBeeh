@@ -133,7 +133,7 @@ export default function App() {
     }
     stopAudio();
 
-    const audio = new Audio(song.file);
+    const audio = new Audio(song.inlineAudio || song.file);
     audioRef.current = audio;
     audio.play().catch(() => {});
     setAudioProgress(0);

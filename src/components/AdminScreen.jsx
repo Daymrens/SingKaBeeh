@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+import RegionsPlugin from 'wavesurfer.js/plugins/regions';
 import { saveSongs, exportSongs, importSongs } from '../utils/adminStorage';
 import { cropAudio } from '../utils/wavEncoder';
 
@@ -97,6 +98,9 @@ const [playing, setPlaying] = useState(false);
   const previewRef = useRef(null);
   const waveRef = useRef(null);
   const waveSurferRef = useRef(null);
+  const regionRef = useRef(null);
+  const regionsRef = useRef(null);
+  const cropEndRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -106,11 +110,44 @@ const [playing, setPlaying] = useState(false);
   }, []);
 
   useEffect(() => {
-    if (cropBlob) {
-      const url = URL.createObjectURL(cropBlob);
-      onChange('file', url);
-    }
+    if (!cropBlob) return;
+    const fileName = `Clips/song-${String(song.id).padStart(2, '0')}.wav`;
+    const url = URL.createObjectURL(cropBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `song-${String(song.id).padStart(2, '0')}.wav`;
+    a.click();
+    const reader = new FileReader();
+    reader.onload = () => {
+      onChange('file', fileName);
+      onChange('inlineAudio', reader.result);
+      URL.revokeObjectURL(url);
+    };
+    reader.readAsDataURL(cropBlob);
   }, [cropBlob]);
+
+  useEffect(() => {
+    cropEndRef.current = cropEnd;
+    const region = regionRef.current;
+    if (region) {
+      region.setOptions({ start: cropStart, end: cropEnd });
+    }
+  }, [cropStart, cropEnd]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        const ws = waveSurferRef.current;
+        if (!ws) return;
+        if (ws.isPlaying()) { ws.pause(); setPlaying(false); }
+        else { ws.setTime(cropStart); ws.play(); setPlaying(true); }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [cropStart]);
 
   const initWaveSurfer = useCallback((url) => {
     if (waveSurferRef.current) { waveSurferRef.current.destroy(); }
@@ -124,13 +161,31 @@ const [playing, setPlaying] = useState(false);
       barWidth: 2,
       barRadius: 2,
     });
+    const regions = ws.registerPlugin(RegionsPlugin.create());
+    regionsRef.current = regions;
     setWaveformLoaded(true);
     ws.load(url);
     ws.on('ready', () => {
+      const duration = ws.getDuration();
       setCropStart(0);
-      setCropEnd(ws.getDuration());
+      setCropEnd(duration);
+      const region = regions.addRegion({
+        start: 0,
+        end: duration,
+        color: 'rgba(255, 215, 0, 0.12)',
+        drag: true,
+        resize: true,
+        minLength: 0.5,
+      });
+      regionRef.current = region;
+      region.on('update', (side) => {
+        setCropStart(region.start);
+        setCropEnd(region.end);
+      });
     });
-    ws.on('timeupdate', () => {});
+    ws.on('timeupdate', (currentTime) => {
+      if (currentTime >= cropEndRef.current) { ws.pause(); setPlaying(false); }
+    });
     ws.on('finish', () => setPlaying(false));
     waveSurferRef.current = ws;
   }, []);
@@ -146,22 +201,38 @@ const [playing, setPlaying] = useState(false);
     initWaveSurfer(url);
   };
 
-  const handleCrop = async () => {
+  const doCrop = async () => {
+    if (!audioFile || cropStart >= cropEnd) return;
+    const blob = await cropAudio(audioFile, cropStart, cropEnd);
+    setCropBlob(blob);
+    return blob;
+  };
+
+  const handleApplyCrop = async () => {
     if (!audioFile || cropStart >= cropEnd) return;
     try {
-      const blob = await cropAudio(audioFile, cropStart, cropEnd);
-      setCropBlob(blob);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `song-${String(song.id).padStart(2, '0')}-cropped.wav`;
-      a.click();
+      await doCrop();
     } catch (err) {
       alert('Crop failed: ' + err.message);
     }
   };
 
-  const existingAudio = song.file && !song.file.startsWith('blob:') ? song.file : null;
+  const handleLoadWaveform = async () => {
+    if (!song.file) return;
+    initWaveSurfer(song.file);
+    setCropBlob(null);
+    try {
+      const resp = await fetch(song.file);
+      if (resp.ok) {
+        const blob = await resp.blob();
+        setAudioFile(blob);
+      }
+    } catch (_) {
+      // fetch not supported for this URL type (e.g. blob:), waveform still works
+    }
+  };
+
+  const existingAudio = song.file ? song.file : null;
 
   return (
     <div className="song-editor">
@@ -211,17 +282,17 @@ const [playing, setPlaying] = useState(false);
             </div>
             <div className="crop-buttons">
               <button className="btn btn-secondary btn-small"
-                onClick={() => { const ws = waveSurferRef.current; if (!ws) return; if (ws.isPlaying()) { ws.pause(); setPlaying(false); } else { ws.play(); setPlaying(true); } }}>
+                onClick={() => { const ws = waveSurferRef.current; if (!ws) return; if (ws.isPlaying()) { ws.pause(); setPlaying(false); } else { ws.setTime(cropStart); ws.play(); setPlaying(true); } }}>
                 {playing ? '⏹ Stop' : '▶ Play'}
               </button>
               {audioFile && (
-                <button className="btn btn-primary btn-small" onClick={handleCrop}
+                <button className="btn btn-primary btn-small" onClick={handleApplyCrop}
                   disabled={cropStart >= cropEnd}>
-                  ✂ Crop & Download
+                  ✂ Apply
                 </button>
               )}
             </div>
-            {cropBlob && <p className="crop-success">✓ Cropped! Downloaded as <strong>song-{String(song.id).padStart(2, '0')}-cropped.wav</strong></p>}
+            {cropBlob && <p className="crop-success">✓ Cropped and saved to song</p>}
           </div>
         )}
 
@@ -230,9 +301,9 @@ const [playing, setPlaying] = useState(false);
             <p>Existing audio: <strong>{song.file}</strong></p>
             <div className="crop-buttons">
               <button className="btn btn-secondary btn-small"
-                onClick={() => { if (previewRef.current) { previewRef.current.pause(); previewRef.current = null; setPrevPlaying(false); } else { const a = new Audio(song.file); a.onended = () => setPrevPlaying(false); a.play(); previewRef.current = a; setPrevPlaying(true); } }}>{prevPlaying ? '⏹ Stop' : '▶ Play'}</button>
+                onClick={() => { if (previewRef.current) { previewRef.current.pause(); previewRef.current = null; setPrevPlaying(false); } else { const a = new Audio(song.inlineAudio || song.file); a.onended = () => setPrevPlaying(false); a.play(); previewRef.current = a; setPrevPlaying(true); } }}>{prevPlaying ? '⏹ Stop' : '▶ Play'}</button>
               <button className="btn btn-secondary btn-small"
-                onClick={() => initWaveSurfer(song.file)}>Load Waveform</button>
+                onClick={handleLoadWaveform}>Load Waveform</button>
             </div>
           </div>
         )}
