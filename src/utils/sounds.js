@@ -34,7 +34,7 @@ export function playRing() {
 export function playRollSound() {
   const a = new Audio('/Sounds/roll.mp3');
   a.volume = 0.5;
-  a.play();
+  a.play().catch(() => {});
   return () => { try { a.pause(); a.currentTime = 0; } catch {} };
 }
 

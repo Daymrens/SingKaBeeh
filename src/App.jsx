@@ -183,7 +183,7 @@ export default function App() {
     genreTargetRef.current = target;
     genreItemsRef.current = [target, ...GENRE_POOL.filter(g => g !== target)];
     setGenrePicker(true);
-    setGenreDisplay('');
+    setGenreDisplay('🎰');
   }, []);
 
   useEffect(() => {
@@ -195,7 +195,8 @@ export default function App() {
 
   useEffect(() => {
     if (!genrePicker) return;
-    const stopRoll = playRollSound();
+    let stopRoll = null;
+    try { stopRoll = playRollSound(); } catch {}
     const target = genreTargetRef.current;
     const items = genreItemsRef.current;
     const start = Date.now();
@@ -205,12 +206,12 @@ export default function App() {
       const idx = Math.floor(elapsed / 60) % items.length;
       setGenreDisplay(items[idx]);
       if (elapsed < 2200) { frame = requestAnimationFrame(spin); return; }
-      stopRoll();
+      if (stopRoll) try { stopRoll(); } catch {}
       setGenreDisplay(target);
       setTimeout(() => { setGenrePicker(false); playCurrentRound(); }, 300);
     };
     frame = requestAnimationFrame(spin);
-    return () => { cancelAnimationFrame(frame); stopRoll(); };
+    return () => { cancelAnimationFrame(frame); if (stopRoll) try { stopRoll(); } catch {} };
   }, [genrePicker, playCurrentRound]);
 
   const nextRound = useCallback(() => {
