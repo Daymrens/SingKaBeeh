@@ -27,6 +27,7 @@ export default function App() {
   const overlayTimerRef = useRef(null);
   const [showTimesUp, setShowTimesUp] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [countdown, setCountdown] = useState(null);
   const [adminPass, setAdminPass] = useState('');
   const [adminError, setAdminError] = useState(false);
 
@@ -63,6 +64,7 @@ export default function App() {
     setShowTimesUp(false);
     setShowConfetti(false);
     setOverlay(null);
+    setCountdown(null);
     stopTimer();
     if (audioRef.current) {
       audioRef.current.pause();
@@ -92,6 +94,7 @@ export default function App() {
       audioRef.current = null;
     }
     stopAudio();
+    setCountdown(3);
   }, [songs, stopTimer, stopAudio]);
 
   const handleSaveSongs = useCallback((updated) => {
@@ -234,6 +237,13 @@ export default function App() {
   useEffect(() => { phaseRef.current = phase; }, [phase]);
 
   useEffect(() => {
+    if (countdown === null) return;
+    if (countdown <= 0) { setCountdown(null); playCurrentRound(); return; }
+    const t = setTimeout(() => setCountdown(countdown - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown, playCurrentRound]);
+
+  useEffect(() => {
     if (!overlay) return;
     if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
     overlayTimerRef.current = setTimeout(() => setOverlay(null), 1500);
@@ -284,6 +294,11 @@ export default function App() {
       {showConfetti && <Confetti />}
       {showTimesUp && <TimesUpPanel onDismiss={() => setShowTimesUp(false)} />}
       {overlay && <OverlayIcon emoji={overlay} />}
+      {countdown !== null && (
+        <div className="countdown-overlay">
+          <div className="countdown-number" key={countdown}>{countdown > 0 ? countdown : '🎤'}</div>
+        </div>
+      )}
 
       {showAdminLogin && (
         <div className="admin-login-overlay" onClick={() => { setShowAdminLogin(false); setAdminPass(''); setAdminError(false); }}>

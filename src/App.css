@@ -420,6 +420,22 @@
 .crop-success { color: #00b894; font-size: 0.85rem; margin-top: 0.5rem; }
 .cropper-existing { font-size: 0.85rem; color: #a0a0cc; }
 
+.countdown-overlay {
+  position: fixed; inset: 0; z-index: 4000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.7);
+}
+.countdown-number {
+  font-size: 8rem; font-weight: 900;
+  color: #ffd700; text-shadow: 0 0 60px rgba(255,215,0,0.5);
+  animation: countPop 0.5s ease-out;
+}
+@keyframes countPop {
+  0% { transform: scale(2); opacity: 0; }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 @media (max-width: 700px) {
   #app { padding: 1rem; }
   .title-content h1 { font-size: 2.8rem; }
