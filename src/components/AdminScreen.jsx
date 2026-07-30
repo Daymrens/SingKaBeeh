@@ -6,9 +6,15 @@ import { cropAudio } from '../utils/wavEncoder';
 export default function AdminScreen({ songs, onSave, onBack }) {
   const [editingId, setEditingId] = useState(null);
   const [dirty, setDirty] = useState(false);
+  const [search, setSearch] = useState('');
 
   const editing = songs.find(s => s.id === editingId) || null;
   const sorted = [...songs].sort((a, b) => a.id - b.id);
+  const filtered = search ? sorted.filter(s =>
+    s.title?.toLowerCase().includes(search.toLowerCase()) ||
+    s.artist?.toLowerCase().includes(search.toLowerCase()) ||
+    s.hint?.toLowerCase().includes(search.toLowerCase())
+  ) : sorted;
 
   const handleSelect = (id) => { setEditingId(id); setDirty(false); };
 
@@ -55,8 +61,9 @@ export default function AdminScreen({ songs, onSave, onBack }) {
 
       <div className="admin-body">
         <div className="admin-sidebar">
+          <input className="admin-search" placeholder="🔍 Search songs..." value={search} onChange={e => setSearch(e.target.value)} />
           <button className="btn btn-primary btn-small add-song-btn" onClick={handleAdd}>+ Add Song</button>
-          {sorted.map(s => (
+          {filtered.map(s => (
             <div key={s.id}
               className={`admin-song-item${s.id === editingId ? ' active' : ''}`}
               onClick={() => handleSelect(s.id)}>
