@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, set, update, onValue, off, get, child } from 'firebase/database';
 
+// # pragma: allowlist secret Firebase web API key is public by design
 const firebaseConfig = {
   apiKey: "AIzaSyB42adc5s070ZEBXbckX44lRnJzuuxO3jk",
   authDomain: "singkabeeh.firebaseapp.com",
