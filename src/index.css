@@ -1,9 +1,31 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+:root {
+  --gold: #ffd700;
+  --gold-light: #ffe44d;
+  --coral: #ff6b6b;
+  --cyan: #00d4ff;
+  --green: #00b894;
+  --bg-dark: #0f0c29;
+  --bg-mid: #302b63;
+  --bg-light: #24243e;
+  --surface: rgba(255,255,255,0.06);
+  --surface-hover: rgba(255,255,255,0.12);
+  --text-muted: #a0a0cc;
+  --text-light: #c0c0e0;
+  --border-subtle: rgba(255,255,255,0.1);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-glow: 0 4px 20px rgba(255,215,0,0.3);
+  --shadow-glow-lg: 0 6px 30px rgba(255,215,0,0.5);
+}
+
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  font-family: 'Poppins', system-ui, sans-serif;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 50%, var(--bg-light) 100%);
   min-height: 100vh;
+  min-height: 100dvh;
   color: #fff;
   display: flex;
   align-items: center;

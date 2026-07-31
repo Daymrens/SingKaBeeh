@@ -1,358 +1,226 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import DEFAULT_SONGS, { shuffleArray } from './data/songs';
 import { loadSongs, saveSongs } from './utils/adminStorage';
-import { playTick, playRing, playSound, playRollSound } from './utils/sounds';
 import TitleScreen from './components/TitleScreen';
-import GameScreen from './components/GameScreen';
+import JoinScreen from './components/JoinScreen';
+import WaitingRoom from './components/WaitingRoom';
+import GameHost from './components/GameHost';
+import GamePlayer from './components/GamePlayer';
 import AdminScreen from './components/AdminScreen';
-import Confetti from './components/Confetti';
-import TimesUpPanel from './components/TimesUpPanel';
-import OverlayIcon from './components/OverlayIcon';
+import HowToPlayModal from './components/HowToPlayModal';
+import ResultsScreen from './components/ResultsScreen';
+import { generateCode, gameExists, createGame, joinGame, leaveGame, listenGame, updateGameConfig, saveSongsToFirebase, setShuffledSongIds, addHost } from './firebase';
 import './App.css';
 
-const GUESS_TIME = 5;
-const PHASES = { IDLE: 'idle', PLAYING: 'playing', GUESSING: 'guessing', REVEALED: 'revealed' };
-const GENRE_POOL = [
-  '🎸 Rock', '🎤 Pop', '🎹 EDM', '🎻 Classical', '🎷 Jazz', '🎧 Hip Hop',
-  '🎵 R&B', '🎶 Soul', '🪘 Funk', '🎸 Indie', '🎤 K-Pop', '🇵🇭 OPM',
-  '🎸 Metal', '🎹 Disco', '🎤 Ballad', '🎧 Rap', '🎵 Reggae', '🎻 Blues',
-  '🎸 Punk', '🎤 Folk', '🎹 Synth', '🎧 Trap', '🎵 Country', '🎶 Gospel',
-  '🎸 Grunge', '🎤 House', '🎹 Techno', '🎧 Lo-Fi', '🎵 Latin', '🎶 Bossa',
-];
+function generatePlayerId() {
+  const existing = localStorage.getItem('sb-player-id');
+  if (existing) return existing;
+  const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  localStorage.setItem('sb-player-id', id);
+  return id;
+}
+
+function saveSession(gameCode, role) {
+  localStorage.setItem('sb-game-code', gameCode);
+  localStorage.setItem('sb-role', role);
+}
+
+function clearSession() {
+  localStorage.removeItem('sb-game-code');
+  localStorage.removeItem('sb-role');
+}
+
+function getSavedSession() {
+  const code = localStorage.getItem('sb-game-code');
+  const role = localStorage.getItem('sb-role');
+  if (code && role) return { code, role };
+  return null;
+}
 
 export default function App() {
   const [screen, setScreen] = useState('title');
+  const [gameCode, setGameCode] = useState(null);
+  const [playerId] = useState(generatePlayerId);
+  const [role, setRole] = useState(null);
+  const [gameData, setGameData] = useState(null);
   const [songs, setSongs] = useState(() => loadSongs(DEFAULT_SONGS));
-  const [gameSongs, setGameSongs] = useState(null);
-  const [round, setRound] = useState(0);
-  const [phase, setPhase] = useState(PHASES.IDLE);
-  const [timeLeft, setTimeLeft] = useState(GUESS_TIME);
-  const [audioProgress, setAudioProgress] = useState(0);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const confettiTimerRef = useRef(null);
-  const [overlay, setOverlay] = useState(null);
-  const overlayTimerRef = useRef(null);
-  const [showTimesUp, setShowTimesUp] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [countdown, setCountdown] = useState(null);
-  const [genrePicker, setGenrePicker] = useState(false);
-  const [genreDisplay, setGenreDisplay] = useState('');
-  const playCurrentRoundRef = useRef(null);
-  const genreTargetRef = useRef(null);
-  const genreItemsRef = useRef([]);
   const [adminPass, setAdminPass] = useState('');
   const [adminError, setAdminError] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
 
-  const timerRef = useRef(null);
-  const timeLeftRef = useRef(GUESS_TIME);
-  const audioTimerRef = useRef(null);
-  const audioRef = useRef(null);
-  const phaseRef = useRef(PHASES.IDLE);
-
-  const activeSongs = gameSongs || songs;
-  const song = activeSongs[round];
-
-  const stopTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+  useEffect(() => {
+    const saved = getSavedSession();
+    if (!saved) return;
+    gameExists(saved.code).then(exists => {
+      if (!exists) { clearSession(); return; }
+      setGameCode(saved.code);
+      setRole(saved.role);
+      setScreen('waiting');
+    });
   }, []);
 
-  const stopAudio = useCallback(() => {
-    if (audioTimerRef.current) {
-      clearInterval(audioTimerRef.current);
-      audioTimerRef.current = null;
-    }
-    setAudioProgress(0);
-  }, []);
+  useEffect(() => {
+    if (!gameCode) return;
+    const unsub = listenGame(gameCode, (data) => setGameData(data));
+    return () => unsub();
+  }, [gameCode]);
 
-  const loadRound = useCallback((s, r) => {
-    setRound(r);
-    setPhase(PHASES.IDLE);
-    timeLeftRef.current = GUESS_TIME;
-    setTimeLeft(GUESS_TIME);
-    setAudioProgress(0);
-    setShowTimesUp(false);
-    setShowConfetti(false);
-    setOverlay(null);
-    setCountdown(null);
-    setGenrePicker(false);
-    setGenreDisplay('');
-    stopTimer();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.onended = null;
-      audioRef.current = null;
-    }
-    stopAudio();
-  }, [stopTimer, stopAudio]);
+  const handleCreateGame = async (name) => {
+    let code;
+    do { code = generateCode(); } while (await gameExists(code));
+    setGameCode(code);
+    setRole('host');
+    saveSession(code, 'host');
+    const currentSongs = loadSongs(DEFAULT_SONGS);
+    await createGame(code, playerId, name, currentSongs);
+    setScreen('waiting');
+  };
 
-  const startGame = useCallback(() => {
-    const shuffled = [...songs];
+  const handleJoinGame = async (code, name) => {
+    const exists = await gameExists(code);
+    if (!exists) return { error: 'Game not found' };
+    setGameCode(code);
+    setRole('player');
+    saveSession(code, 'player');
+    await joinGame(code, playerId, name);
+    setScreen('waiting');
+  };
+
+  const handleStartGame = async () => {
+    const songList = gameData?.songs ? Object.values(gameData.songs) : [];
+    const shuffled = [...songList];
     shuffleArray(shuffled);
-    setGameSongs(shuffled);
-    setScreen('game');
-    setRound(0);
-    setPhase(PHASES.IDLE);
-    timeLeftRef.current = GUESS_TIME;
-    setTimeLeft(GUESS_TIME);
-    setAudioProgress(0);
-    setShowTimesUp(false);
-    setShowConfetti(false);
-    setOverlay(null);
-    stopTimer();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.onended = null;
-      audioRef.current = null;
-    }
-    stopAudio();
-    setCountdown(1);
-    setGenrePicker(false);
-  }, [songs, stopTimer, stopAudio]);
+    await setShuffledSongIds(gameCode, shuffled.map(s => s.id));
+    await updateGameConfig(gameCode, { status: 'playing' });
+    setScreen('game-host');
+  };
+
+  const handleLeaveGame = async () => {
+    if (gameCode && playerId) await leaveGame(gameCode, playerId);
+    clearSession();
+    setGameCode(null);
+    setRole(null);
+    setGameData(null);
+    setScreen('title');
+  };
+
+  const handleBackToTitle = () => {
+    clearSession();
+    setGameCode(null);
+    setRole(null);
+    setGameData(null);
+    setScreen('title');
+  };
+
+  const handlePromoteHost = async (pid, name) => {
+    if (!gameCode) return;
+    const hostCount = gameData?.hosts ? Object.keys(gameData.hosts).length : 0;
+    if (hostCount >= 3) return;
+    await addHost(gameCode, pid, name);
+  };
+
+  const isHost = !!(gameData?.hosts && gameData.hosts[playerId]);
 
   const handleSaveSongs = useCallback((updated) => {
     setSongs(updated);
     saveSongs(updated);
-  }, []);
+    if (gameCode) saveSongsToFirebase(gameCode, updated);
+  }, [gameCode]);
 
-  const playCurrentRound = useCallback(() => {
-    if (!song) return;
-    setShowTimesUp(false);
-    setShowConfetti(false);
-    setOverlay(null);
-    stopTimer();
-    timeLeftRef.current = GUESS_TIME;
-    setTimeLeft(GUESS_TIME);
-    setPhase(PHASES.PLAYING);
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.onended = null;
+  useEffect(() => {
+    if (!gameData || screen !== 'waiting') return;
+    if (gameData.config?.status === 'playing') {
+      const iAmHost = gameData.hosts && gameData.hosts[playerId];
+      setScreen(iAmHost ? 'game-host' : 'game-player');
+      setShowIntro(true);
     }
-    stopAudio();
-
-    const audio = new Audio(song.inlineAudio || song.file);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-    setAudioProgress(0);
-
-    const progInterval = setInterval(() => {
-      if (audio.duration) {
-        setAudioProgress(audio.currentTime / audio.duration * 100);
-      }
-    }, 100);
-    audioTimerRef.current = progInterval;
-  }, [song, stopTimer, stopAudio]);
-
-  const startTimer = useCallback(() => {
-    stopTimer();
-    timeLeftRef.current = GUESS_TIME;
-    setTimeLeft(GUESS_TIME);
-    timerRef.current = setInterval(() => {
-      timeLeftRef.current--;
-      const val = timeLeftRef.current;
-      if (val > 0 && val <= 4) playTick();
-      setTimeLeft(val);
-      if (val <= 0) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-        playRing();
-        setShowTimesUp(true);
-      }
-    }, 1000);
-  }, [stopTimer]);
-
-  const revealAnswer = useCallback(() => {
-    const p = phaseRef.current;
-    if (p !== PHASES.GUESSING && p !== PHASES.PLAYING) return;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    stopAudio();
-    stopTimer();
-    setPhase(PHASES.REVEALED);
-    setShowConfetti(true);
-    playSound('correct');
-    setOverlay(null);
-  }, [stopAudio, stopTimer]);
-
-  const startGenrePicker = useCallback((hint) => {
-    const target = hint || '🎵 Music';
-    genreTargetRef.current = target;
-    genreItemsRef.current = [target, ...GENRE_POOL.filter(g => g !== target)];
-    setGenrePicker(true);
-    setGenreDisplay('🎰');
-  }, []);
-
-  useEffect(() => {
-    if (countdown === null) return;
-    if (countdown <= 0) { setCountdown(null); startGenrePicker(song?.hint); return; }
-    const t = setTimeout(() => setCountdown(countdown - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown, startGenrePicker, song]);
-
-  useEffect(() => {
-    playCurrentRoundRef.current = playCurrentRound;
-  });
-
-  useEffect(() => {
-    if (!genrePicker) return;
-    let stopRoll = null;
-    try { stopRoll = playRollSound(); } catch {}
-    const target = genreTargetRef.current;
-    const items = genreItemsRef.current;
-    const start = Date.now();
-    let frame;
-    const spin = () => {
-      const elapsed = Date.now() - start;
-      const idx = Math.floor(elapsed / 60) % items.length;
-      setGenreDisplay(items[idx]);
-      if (elapsed < 2200) { frame = requestAnimationFrame(spin); return; }
-      if (stopRoll) try { stopRoll(); } catch {}
-      setGenreDisplay(target);
-      setTimeout(() => { setGenrePicker(false); playCurrentRoundRef.current(); }, 3000);
-    };
-    frame = requestAnimationFrame(spin);
-    return () => { cancelAnimationFrame(frame); if (stopRoll) try { stopRoll(); } catch {} };
-  }, [genrePicker]);
-
-  const nextRound = useCallback(() => {
-    const next = round + 1;
-    const list = gameSongs || songs;
-    if (next >= list.length) {
+    if (gameData.config?.status === 'cancelled') {
+      clearSession();
+      setGameCode(null);
+      setRole(null);
+      setGameData(null);
       setScreen('title');
-      setGameSongs(null);
-      return;
     }
-    const hint = list[next]?.hint;
-    loadRound(list, next);
-    setTimeout(() => startGenrePicker(hint), 0);
-  }, [round, gameSongs, songs, loadRound, startGenrePicker]);
+  }, [gameData, role, playerId, screen]);
 
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Enter' && screen === 'title') {
-      e.preventDefault();
-      startGame();
-      return;
-    }
-    if ((e.key === ' ' || e.key === 'Space') && screen === 'game') {
-      e.preventDefault();
-      const p = phaseRef.current;
-      if (p === PHASES.PLAYING) {
-        setPhase(PHASES.GUESSING);
-        startTimer();
-        return;
-      }
-      if (p === PHASES.GUESSING) {
-        revealAnswer();
-        return;
-      }
-      if (p === PHASES.IDLE) {
-        e.preventDefault();
-        playCurrentRound();
-      }
-    }
-    if ((e.which === 49 || e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') && screen === 'game') {
-      if (phaseRef.current === PHASES.GUESSING) {
-        e.preventDefault();
-        revealAnswer();
-        return;
-      }
-    }
-    if ((e.which === 50 || e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') && screen === 'game') {
-      const p = phaseRef.current;
-      if (p === PHASES.GUESSING || p === PHASES.REVEALED) {
-        e.preventDefault();
-        setOverlay('❌');
-        return;
-      }
-    }
-    if ((e.key === 'n' || e.key === 'N') && screen === 'game' && phaseRef.current === PHASES.REVEALED) {
-      nextRound();
-    }
-    if (e.key === 'Escape' && screen === 'game') {
+  useEffect(() => {
+    if (!gameData || screen !== 'game-host' && screen !== 'game-player' && screen !== 'results') return;
+    if (gameData.config?.status === 'cancelled') {
+      clearSession();
+      setGameCode(null);
+      setRole(null);
+      setGameData(null);
       setScreen('title');
-      setGameSongs(null);
-      setGenrePicker(false);
-      return;
     }
-  }, [screen, startGame, startTimer, revealAnswer, playCurrentRound, stopAudio, stopTimer, nextRound]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
-  useEffect(() => { phaseRef.current = phase; }, [phase]);
-
-  useEffect(() => {
-    if (!overlay) return;
-    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-    overlayTimerRef.current = setTimeout(() => setOverlay(null), 1500);
-    return () => { if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current); };
-  }, [overlay]);
-
-  useEffect(() => {
-    if (!showConfetti) return;
-    if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
-    confettiTimerRef.current = setTimeout(() => setShowConfetti(false), 3000);
-    return () => { if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current); };
-  }, [showConfetti]);
-
-  useEffect(() => {
-    return () => {
-      stopTimer();
-      stopAudio();
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [stopTimer, stopAudio]);
-
-  const roundLabel = song ? `Round ${round + 1} / ${activeSongs.length}` : '';
-  const songWithLabel = song ? { ...song, roundLabel } : null;
+    if (gameData.config?.status === 'finished') {
+      setShowIntro(false);
+      setScreen('results');
+    }
+  }, [gameData, screen]);
 
   return (
     <div id="app">
-      {screen === 'title' && <TitleScreen onStart={startGame} onAdmin={() => setShowAdminLogin(true)} />}
+      {screen === 'title' && (
+        <TitleScreen
+          onCreate={() => setScreen('join-host')}
+          onJoin={() => setScreen('join-player')}
+          onAdmin={() => setShowAdminLogin(true)}
+        />
+      )}
 
-      {screen === 'game' && countdown === null && !genrePicker && songWithLabel && (
-        <GameScreen
-          song={songWithLabel}
-          phase={phase}
-          timeLeft={timeLeft}
-          audioProgress={audioProgress}
-          onPlay={playCurrentRound}
-          onRevealClick={revealAnswer}
-          onNext={nextRound}
+      {screen === 'join-host' && (
+        <JoinScreen mode="create" onCreate={handleCreateGame} onBack={() => setScreen('title')} />
+      )}
+
+      {screen === 'join-player' && (
+        <JoinScreen mode="join" onJoin={handleJoinGame} onBack={() => setScreen('title')} />
+      )}
+
+      {screen === 'waiting' && gameCode && (
+        <WaitingRoom
+          gameCode={gameCode}
+          role={role}
+          playerId={playerId}
+          gameData={gameData}
+          onStart={handleStartGame}
+          onBack={handleLeaveGame}
+          onPromoteHost={handlePromoteHost}
+        />
+      )}
+
+      {screen === 'game-host' && gameCode && (
+        <GameHost
+          gameCode={gameCode}
+          gameData={gameData}
+          onBack={handleBackToTitle}
+        />
+      )}
+
+      {screen === 'game-player' && gameCode && (
+        <GamePlayer
+          gameCode={gameCode}
+          playerId={playerId}
+          gameData={gameData}
+        />
+      )}
+
+      {screen === 'results' && gameCode && gameData && (
+        <ResultsScreen
+          gameData={gameData}
+          onHome={handleBackToTitle}
+        />
+      )}
+
+      {showIntro && (screen === 'game-host' || screen === 'game-player') && (
+        <HowToPlayModal
+          role={gameData?.hosts && gameData.hosts[playerId] ? 'host' : 'player'}
+          onClose={() => setShowIntro(false)}
         />
       )}
 
       {screen === 'admin' && (
         <AdminScreen songs={songs} onSave={handleSaveSongs} onBack={() => setScreen('title')} />
-      )}
-
-      {showConfetti && <Confetti />}
-      {showTimesUp && <TimesUpPanel onDismiss={() => setShowTimesUp(false)} />}
-      {overlay && <OverlayIcon emoji={overlay} />}
-      {countdown !== null && (
-        <div className="countdown-overlay">
-          <div className="countdown-number" key={countdown}>Let's play</div>
-        </div>
-      )}
-      {genrePicker && (
-        <div className="countdown-overlay">
-          <div className="genre-picker">
-            <div className="genre-label">🎵 Category</div>
-            <div className={`genre-display${genreDisplay === genreTargetRef.current ? ' landed' : ' spinning'}`}>
-              {genreDisplay}
-            </div>
-          </div>
-        </div>
       )}
 
       {showAdminLogin && (
